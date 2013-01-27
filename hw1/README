@@ -1,0 +1,24 @@
+
+Build Requirements:
+---------------------
+    cmake
+    c++11 compiler
+    glut
+    glew
+
+
+Build Instructions:
+---------------------
+- Extract the source code
+
+- From the source directory, run the command "cmake ."  (don't forget the dot!)
+  Optionally, you can create a directory called 'build' and from it, run "cmake .."
+  This will confine all generated build files to this directory, and not clutter
+  up the source tree
+
+- For Linux/MacOS, just run 'make' to compile
+
+- For Windows, a Visual Studio project file is generated 
+
+- Run the program 'mountain'
+
