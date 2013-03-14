@@ -1,0 +1,31 @@
+Build Instructions:
+=============================
+- Extract the source code
+
+- From the source directory, run the command "cmake ."  (don't forget the dot!)
+- For Linux/MacOS, just run 'make' to compile
+- For Windows, a Visual Studio project file is generated (untested!  may need to change library names)
+- Run the 'render' program (must be run from the source tree and not some other directory)
+
+
+
+Directions for moving camera:
+==============================
+
+    Action       Key
+    ----------------
+    Move +Y       w
+    Move -Y       s
+    Move +X       d
+    Move -X       a
+    Move +Z       q
+    Move -Z       e
+
+    Pitch Up      Up Arrow
+    Pitch Down    Down Arrow
+    Yaw Left      Left Arrow
+    Yaw Right     Right Arrow
+
+    Roll Left     Page Up
+    Roll Right    Page Down
+
