@@ -2,7 +2,6 @@
 #include <GL/glut.h>
 #include "Shader.hpp"
 #include "Program.hpp"
-#include "Mountain.hpp"
 #include "Scene.hpp"
 #include "Camera.hpp"
 #include "defs.h"
@@ -106,16 +105,15 @@ int main(int argc, char **argv)
         glutIdleFunc(onIdle);
 
         glEnable(GL_DEPTH_TEST);
-        //glEnable(GL_CULL_FACE);
-        //glCullFace(GL_BACK);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
         
-        Light light1(glm::vec3(0.0f, 1.7f, 0.5f), // Position
-                     glm::vec3(1.0f, 1.0f, 1.0f),  // ambient
-                     glm::vec3(1.0f, 1.0f, 1.0f),  // diffuse
-                     glm::vec3(1.0f, 1.0f, 1.0f)); // specular
+        Light light1(glm::vec3(0.0, 1.0, 2.0),  // position
+                     glm::vec3(1.0, 0.8, 0.8),  // diffuse
+                     glm::vec3(1.0, 1.0, 1.0)); // specular
         
         scene.init();
-        //scene.setAmbientLight(glm::vec3(0.1, 0.1, 0.1));
+        scene.setAmbientLight(glm::vec3(0.2, 0.2, 0.2));
         scene.addLight(light1);
         scene.loadObjectFromPly(filepath);
 

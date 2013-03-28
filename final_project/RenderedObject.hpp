@@ -32,7 +32,7 @@ public:
     void setMaterial(const Material &m);
 
     // Render the object
-    void render(GLuint modelmatrixid);
+    void render(GLuint modelmatrixid, GLuint modelinvtranspmatrixid);
 
     // Access the mesh data (probably should enforce const or something)
     std::shared_ptr<Mesh> getMesh() { return _mesh; }
@@ -45,6 +45,7 @@ private:
 private:
     std::shared_ptr<Mesh> _mesh;
     glm::mat4 _modelmatrix;
+    glm::mat3 _modelinvtranspmatrix;
     bool _visible;
 
     GLuint _glvertexbuffer;

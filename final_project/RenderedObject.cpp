@@ -4,6 +4,7 @@
 #include "RenderedObject.hpp"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/matrix_inverse.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
 using namespace std;
@@ -11,15 +12,16 @@ using namespace std;
 
 RenderedObject::RenderedObject(GLuint program, std::shared_ptr<Mesh> mesh)
     : _mesh(mesh),
-      _modelmatrix(glm::mat4(1.0)),
       _visible(true)
 {
+    setModelMatrix(glm::mat4(1.0));
+
     glGenBuffers(1, &_glvertexbuffer);
     glGenBuffers(1, &_glnormalbuffer);
     glGenBuffers(1, &_glmeshbuffer);
 
-    _glvertexattrib = glGetAttribLocation(program, "vertex");
-    _glnormalattrib = glGetAttribLocation(program, "vertexnormal");
+    _glvertexattrib = glGetAttribLocation(program, "vertex_coord");
+    _glnormalattrib = glGetAttribLocation(program, "vertex_normal");
 
     _glshininess    = glGetUniformLocation(program, "shininess");
     _glambient      = glGetUniformLocation(program, "materialambient");
@@ -28,9 +30,9 @@ RenderedObject::RenderedObject(GLuint program, std::shared_ptr<Mesh> mesh)
 
     Material m;
     m.setAmbient(glm::vec3(0.2, 0.2, 0.2));
-    m.setDiffuse(glm::vec3(0.1, 0.15, 0.1));
-    m.setSpecular(glm::vec3(4000.0, 9000.0, 4000.0));
-    m.setShininess(20.0);
+    m.setDiffuse(glm::vec3(1.0, 0.8, 0.8));
+    m.setSpecular(glm::vec3(1.0, 1.0, 1.0));
+    m.setShininess(10.0);
     setMaterial(m);
 
     storePoints();
@@ -49,6 +51,7 @@ void RenderedObject::storePoints()
         rawpoints.push_back(v.x);
         rawpoints.push_back(v.y);
         rawpoints.push_back(v.z);
+        rawpoints.push_back(1.0);
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, _glvertexbuffer);
@@ -108,6 +111,7 @@ void RenderedObject::setVisible(bool visible)
 void RenderedObject::setModelMatrix(glm::mat4 matrix)
 {
     _modelmatrix = matrix; 
+    _modelinvtranspmatrix = glm::inverseTranspose(glm::mat3(matrix));
 }
 
 
@@ -119,7 +123,7 @@ void RenderedObject::setMaterial(const Material &m)
 
 
 // Render the object
-void RenderedObject::render(GLuint modelmatrixid)
+void RenderedObject::render(GLuint modelmatrixid, GLuint modelinvtranspmatrixid)
 {
     // Don't render if it's been flagged as not visible
     if (!_visible)
@@ -127,10 +131,12 @@ void RenderedObject::render(GLuint modelmatrixid)
 
     glUniformMatrix4fv(modelmatrixid, 1, GL_FALSE, glm::value_ptr(_modelmatrix));
 
+    glUniformMatrix3fv(modelinvtranspmatrixid, 1, GL_FALSE, glm::value_ptr(_modelinvtranspmatrix));
+
     glEnableVertexAttribArray(_glvertexattrib);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glmeshbuffer);
     glBindBuffer(GL_ARRAY_BUFFER, _glvertexbuffer);
-    glVertexAttribPointer(_glvertexattrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(_glvertexattrib, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
     glEnableVertexAttribArray(_glnormalattrib);
     glBindBuffer(GL_ARRAY_BUFFER, _glnormalbuffer);
@@ -141,10 +147,9 @@ void RenderedObject::render(GLuint modelmatrixid)
     glDisableVertexAttribArray(_glvertexattrib);
     glDisableVertexAttribArray(_glnormalattrib);
 
-
-    GLfloat shininess = _material.getShininess();
-    glm::vec4 ambient = glm::vec4(_material.getAmbient(), 1.0);
-    glm::vec4 diffuse = glm::vec4(_material.getDiffuse(), 1.0);
+    GLfloat shininess  = _material.getShininess();
+    glm::vec4 ambient  = glm::vec4(_material.getAmbient(), 1.0);
+    glm::vec4 diffuse  = glm::vec4(_material.getDiffuse(), 1.0);
     glm::vec4 specular = glm::vec4(_material.getSpecular(), 1.0);
 
     glUniform1f(_glshininess, shininess);
