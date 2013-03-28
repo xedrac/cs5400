@@ -27,7 +27,7 @@ public:
 
     // Sets the color/brightness of the ambient light
     // (0,0,0) is total darkness, (1.0,1,0,1,0) is total light
-    //void setAmbientLight(glm::vec3 rgb);
+    void setAmbientLight(const glm::vec3 &rgb) { _ambientlight = rgb; }
 
 
     // render all of the objects in the scene
@@ -45,19 +45,26 @@ private:
     std::vector<RenderedObject> _objects;
 
     std::vector<Light> _lights;
-    //glm::vec3 _ambientlight;
+    glm::vec3 _ambientlight;
 
-    GLuint _vertex;
-    GLuint _vertexnormal;
     GLuint _glModelMatrix;
     GLuint _glViewMatrix;
     GLuint _glProjectionMatrix;
+    GLuint _glModelInvTranspMatrix;
+    GLuint _glViewInverseMatrix;
 
     GLuint _glLightPosition;
     GLuint _glLightAmbient;
     GLuint _glLightDiffuse;
     GLuint _glLightSpecular;
+    GLuint _glLightAttenuation;
+    GLuint _glLightSpotCutoff;
+    GLuint _glLightSpotExponent;
+    GLuint _glLightSpotDirection;
     GLuint _glLightCount;
+    GLuint _glSceneAmbient;
+
+    GLuint _glCameraPosition;
 };
 
 

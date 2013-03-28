@@ -15,7 +15,6 @@ add_executable(render
     main.cpp
     Program.cpp
     Shader.cpp
-    Mountain.cpp
     Util.cpp
     Mesh.cpp
     Scene.cpp
