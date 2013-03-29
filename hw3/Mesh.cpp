@@ -6,52 +6,134 @@
 using namespace std;
 
 
-// Calculate the normals for a given mesh using the
-// "Mean Weighted by Angle" (MWA) algorithm as seen in the paper
-// "A Comparison of Algorithms for Vertex Normal Computation"
-void Mesh::calcNormalsMWA()
+// Calculate the triangle normals for this mesh
+// Also keep track of which triangles a given vertex
+// is a part of 
+vector<glm::vec3> Mesh::calcTriangleNormals(vector<vector<size_t>> &vertexToTrianglesMap)
 {
     // keep track of which triangles a given vertex is part of
-    vector<vector<size_t>> vtmap;
-    vtmap.resize(vertices.size());
+    vertexToTrianglesMap.resize(vertices.size());
 
     // calculate triangle normals
-    vector<glm::vec3> tN;
+    vector<glm::vec3> tNormals;
     for (size_t i=0; i<triangles.size(); i++) {
         const Triangle &t = triangles[i];
         const glm::vec3 &a = vertices[t.a];
         const glm::vec3 &b = vertices[t.b];
         const glm::vec3 &c = vertices[t.c];
-        tN.push_back(glm::cross(c-a, b-a));
+        tNormals.push_back(glm::cross(b-a, c-a));
 
-        vtmap[t.a].push_back(i);
-        vtmap[t.b].push_back(i);
-        vtmap[t.c].push_back(i);
+        vertexToTrianglesMap[t.a].push_back(i);
+        vertexToTrianglesMap[t.b].push_back(i);
+        vertexToTrianglesMap[t.c].push_back(i);
     }
+
+    return tNormals;
+}
+
+
+glm::vec3 Mesh::calcNormalMWA(const std::vector<size_t> &tvec, const std::vector<glm::vec3> &tN)
+{
+    glm::vec3 normal(0.0, 0.0, 0.0);
+
+    for (size_t i=0; i<tvec.size(); i++) {
+        const size_t tindex = tvec[i];
+        const Triangle &t = triangles[tindex];
+        const glm::vec3 &p1 = vertices[t.a];
+        const glm::vec3 &p2 = vertices[t.b];
+        const glm::vec3 &p3 = vertices[t.c];
+        glm::vec3 edge1 = p2 - p1;
+        glm::vec3 edge2 = p3 - p1;
+        glm::vec3 edgecross = glm::cross(edge1, edge2);
+        float sinalpha = glm::length(edgecross) / (glm::length(edge1) * glm::length(edge2));
+        float alpha    = asin(sinalpha);
+
+        normal += alpha * tN[tindex];
+    }
+
+    return glm::normalize(normal);
+}
+
+
+glm::vec3 Mesh::calcNormalMWASEL(const vector<size_t> &tvec, const vector<glm::vec3> &tN)
+{
+    glm::vec3 normal(0.0, 0.0, 0.0);
+
+    for (size_t i=0; i<tvec.size(); i++) {
+        const size_t tindex = tvec[i];
+        const Triangle &t = triangles[tindex];
+        const glm::vec3 &p1 = vertices[t.a];
+        const glm::vec3 &p2 = vertices[t.b];
+        const glm::vec3 &p3 = vertices[t.c];
+        glm::vec3 edge1 = p2 - p1;
+        glm::vec3 edge2 = p3 - p1;
+        glm::vec3 edgecross = glm::cross(edge1, edge2);
+        float edge1len = glm::length(edge1);
+        float edge2len = glm::length(edge2);
+        float sinalpha = glm::length(edgecross) / (edge1len * edge2len);
+        normal += sinalpha * tN[tindex] / (edge1len * edge2len);
+    }
+
+    return glm::normalize(normal);
+}
+
+
+glm::vec3 Mesh::calcNormalMWE(const std::vector<size_t> &tvec, const std::vector<glm::vec3> &tN)
+{
+    glm::vec3 normal(0.0, 0.0, 0.0);
+
+    for (size_t i=0; i<tvec.size(); i++) {
+        const size_t tindex = tvec[i];
+        normal += tN[tindex];
+    }
+
+    return glm::normalize(normal);
+}
+
+
+float Mesh::calcAreaOfTriangle(const Triangle &t)
+{
+    const glm::vec3 &p1 = vertices[t.a];
+    const glm::vec3 &p2 = vertices[t.b];
+    const glm::vec3 &p3 = vertices[t.c];
+    double a = glm::length(p3-p2);
+    double b = glm::length(p3-p1);
+    double c = glm::length(p2-p1);
+
+    double s = (a + b + c) / 2.0;
+
+    return (float)sqrt(s*(s-a)*(s-b)*(s-c));
+}
+
+// Mean weighted by surface area
+glm::vec3 Mesh::calcNormalMWSA(const std::vector<size_t> &tvec, const std::vector<glm::vec3> &tN)
+{
+    glm::vec3 normal(0.0, 0.0, 0.0); 
+
+    for (size_t i=0; i<tvec.size(); i++) {
+        const size_t tindex = tvec[i];
+        const Triangle &t = triangles[tindex];
+        float area = calcAreaOfTriangle(t);
+        normal += tN[tindex]*area;
+    }
+
+    return glm::normalize(normal);
+}
+
+
+// Calculate the normals for a given mesh using the
+// "Mean Weighted by Angle" (MWA) algorithm as seen in the paper
+// "A Comparison of Algorithms for Vertex Normal Computation"
+void Mesh::calcNormalsMWA()
+{
+    vector<vector<size_t>> vtmap;
+    vector<glm::vec3> tN = calcTriangleNormals(vtmap);
 
     normals.clear();
 
-    // Now calculate the vertex normals
     for (size_t i=0; i<vertices.size(); i++) {
-        const vector<size_t> &tlist = vtmap[i];
-        
-        glm::vec3 normal(0.0f, 0.0f, 0.0f);
-
-        for (size_t k=0; k<tlist.size(); k++) {
-            const Triangle &t = triangles[tlist[k]];
-            const glm::vec3 &p1 = vertices[t.a];
-            const glm::vec3 &p2 = vertices[t.b];
-            const glm::vec3 &p3 = vertices[t.c];
-            glm::vec3 edge1 = p2 - p1;
-            glm::vec3 edge2 = p3 - p1;
-            glm::vec3 edgecross = glm::cross(edge1, edge2);
-            float sinalpha = glm::length(edgecross) / (glm::length(edge1) * glm::length(edge2));
-            float alpha    = asin(sinalpha);
-
-            normal += alpha * tN[tlist[k]];
-        }
-
-        normals.push_back(glm::normalize(normal));
+        const vector<size_t> &tvec = vtmap[i]; 
+        normals.push_back(calcNormalMWA(tvec, tN));
     }
 }
 
@@ -61,48 +143,14 @@ void Mesh::calcNormalsMWA()
 // "A Comparison of Algorithms for Vertex Normal Computation"
 void Mesh::calcNormalsMWASEL()
 {
-    // keep track of which triangles a given vertex is part of
     vector<vector<size_t>> vtmap;
-    vtmap.resize(vertices.size());
-
-    // calculate triangle normals
-    vector<glm::vec3> tN;
-    for (size_t i=0; i<triangles.size(); i++) {
-        const Triangle &t = triangles[i];
-        const glm::vec3 &a = vertices[t.a];
-        const glm::vec3 &b = vertices[t.b];
-        const glm::vec3 &c = vertices[t.c];
-        tN.push_back(glm::cross(c-a, b-a));
-
-        vtmap[t.a].push_back(i);
-        vtmap[t.b].push_back(i);
-        vtmap[t.c].push_back(i);
-    }
+    vector<glm::vec3> tN = calcTriangleNormals(vtmap);
 
     normals.clear();
 
-    // Now calculate the vertex normals
     for (size_t i=0; i<vertices.size(); i++) {
-        const vector<size_t> &tlist = vtmap[i];
-        
-        glm::vec3 normal(0.0f, 0.0f, 0.0f);
-
-        for (size_t k=0; k<tlist.size(); k++) {
-            const Triangle &t = triangles[tlist[k]];
-            const glm::vec3 &p1 = vertices[t.a];
-            const glm::vec3 &p2 = vertices[t.b];
-            const glm::vec3 &p3 = vertices[t.c];
-            glm::vec3 edge1 = p2 - p1;
-            glm::vec3 edge2 = p3 - p1;
-            glm::vec3 edgecross = glm::cross(edge1, edge2);
-            float edge1len = glm::length(edge1);
-            float edge2len = glm::length(edge2);
-            float sinalpha = glm::length(edgecross) / (edge1len * edge2len);
-
-            normal += sinalpha * tN[tlist[k]] / (edge1len * edge2len);
-        }
-
-        normals.push_back(glm::normalize(normal));
+        const vector<size_t> &tvec = vtmap[i]; 
+        normals.push_back(calcNormalMWASEL(tvec, tN));
     }
 }
 
@@ -111,37 +159,26 @@ void Mesh::calcNormalsMWASEL()
 // "Mean Weighted Equally" (MWE) algorithm (Naive approach)
 void Mesh::calcNormalsMWE()
 {
-    // keep track of which triangles a given vertex is part of
     vector<vector<size_t>> vtmap;
-    vtmap.resize(vertices.size());
-
-    // calculate triangle normals
-    vector<glm::vec3> tN;
-    for (size_t i=0; i<triangles.size(); i++) {
-        const Triangle &t = triangles[i];
-        const glm::vec3 &a = vertices[t.a];
-        const glm::vec3 &b = vertices[t.b];
-        const glm::vec3 &c = vertices[t.c];
-        tN.push_back(glm::cross(c-a, b-a));
-
-        vtmap[t.a].push_back(i);
-        vtmap[t.b].push_back(i);
-        vtmap[t.c].push_back(i);
-    }
+    vector<glm::vec3> tN = calcTriangleNormals(vtmap);
 
     normals.clear();
 
-    // Now calculate the vertex normals
     for (size_t i=0; i<vertices.size(); i++) {
-        const vector<size_t> &tlist = vtmap[i];
-        
-        glm::vec3 normal(0.0f, 0.0f, 0.0f);
-
-        for (size_t k=0; k<tlist.size(); k++) {
-            normal += tN[tlist[k]];
-        }
-
-        normals.push_back(glm::normalize(normal));
+        const vector<size_t> &tvec = vtmap[i]; 
+        normals.push_back(calcNormalMWE(tvec, tN));
     }
 }
 
+void Mesh::calcNormalsMWSA()
+{
+    vector<vector<size_t>> vtmap;
+    vector<glm::vec3> tN = calcTriangleNormals(vtmap);
+
+    normals.clear();
+
+    for (size_t i=0; i<vertices.size(); i++) {
+        const vector<size_t> &tvec = vtmap[i]; 
+        normals.push_back(calcNormalMWSA(tvec, tN));
+    }
+}

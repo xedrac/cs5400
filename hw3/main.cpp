@@ -52,12 +52,12 @@ void onKey(unsigned char key, int, int)
 void onSpecialKey(int key, int, int)
 {
     switch(key) {
-        case GLUT_KEY_PAGE_UP:   camera.roll(-1.0);  break;
-        case GLUT_KEY_PAGE_DOWN: camera.roll( 1.0);  break;
-        case GLUT_KEY_LEFT:      camera.yaw( 1.0);   break;
-        case GLUT_KEY_RIGHT:     camera.yaw(-1.0);   break;
-        case GLUT_KEY_UP:        camera.pitch( 1.0); break;
-        case GLUT_KEY_DOWN:      camera.pitch(-1.0); break;
+        case GLUT_KEY_PAGE_UP:   camera.roll(-1.5);  break;
+        case GLUT_KEY_PAGE_DOWN: camera.roll( 1.5);  break;
+        case GLUT_KEY_LEFT:      camera.yaw( 1.5);   break;
+        case GLUT_KEY_RIGHT:     camera.yaw(-1.5);   break;
+        case GLUT_KEY_UP:        camera.pitch( 1.5); break;
+        case GLUT_KEY_DOWN:      camera.pitch(-1.5); break;
         default:
             break;
     }

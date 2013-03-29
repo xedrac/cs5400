@@ -34,6 +34,8 @@ public:
     // Naive wait to calculate normals
     void calcNormalsMWE();
 
+    void calcNormalsMWSA();
+
     // Complete set of vertices in the mesh
     std::vector<glm::vec3> vertices;
 
@@ -43,6 +45,14 @@ public:
     // vertex indicies that make up the triangles of this mesh
     // (0,1,2), (3,4,5) ...  are indexes for triangles
     std::vector<Triangle> triangles;
+
+ private:
+    std::vector<glm::vec3> calcTriangleNormals(std::vector<std::vector<size_t>> &vertexToTrianglesMap);
+    glm::vec3 calcNormalMWASEL(const std::vector<size_t> &tvec, const std::vector<glm::vec3> &tN);
+    glm::vec3 calcNormalMWA(const std::vector<size_t> &tvec, const std::vector<glm::vec3> &tN);
+    glm::vec3 calcNormalMWE(const std::vector<size_t> &tvec, const std::vector<glm::vec3> &tN);
+    glm::vec3 calcNormalMWSA(const std::vector<size_t> &tvec, const std::vector<glm::vec3> &tN);
+    float     calcAreaOfTriangle(const Triangle &t);
 };
 
 #endif
