@@ -4,8 +4,8 @@ Build Instructions:
 
 - From the source directory, run the command "cmake ."  (don't forget the dot!)
 - For Linux/MacOS, just run 'make' to compile
-- For Windows, a Visual Studio project file is generated (untested!  may need to change library names)
-- Run the 'render' program (must be run from the source tree and not some other directory)
+- For Windows, a Visual Studio project file is generated
+- Run the 'render' program
 
 
 
