@@ -49,7 +49,7 @@ public:
  private:
     std::vector<glm::vec3> calcTriangleNormals(std::vector<std::vector<size_t>> &vertexToTrianglesMap);
     glm::vec3 calcNormalMWASEL(const std::vector<size_t> &tvec, const std::vector<glm::vec3> &tN);
-    glm::vec3 calcNormalMWA(const std::vector<size_t> &tvec, const std::vector<glm::vec3> &tN);
+    glm::vec3 calcNormalMWA(size_t vindex, const std::vector<size_t> &tvec, const std::vector<glm::vec3> &tN);
     glm::vec3 calcNormalMWE(const std::vector<size_t> &tvec, const std::vector<glm::vec3> &tN);
     glm::vec3 calcNormalMWSA(const std::vector<size_t> &tvec, const std::vector<glm::vec3> &tN);
     float     calcAreaOfTriangle(const Triangle &t);

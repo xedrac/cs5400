@@ -30,7 +30,7 @@ RenderedObject::RenderedObject(GLuint program, std::shared_ptr<Mesh> mesh)
 
     Material m;
     m.setAmbient(glm::vec3(0.2, 0.2, 0.2));
-    m.setDiffuse(glm::vec3(0.8, 0.6, 0.6));
+    m.setDiffuse(glm::vec3(0.8, 1.0, 0.8));
     m.setSpecular(glm::vec3(1.0, 1.0, 1.0));
     m.setShininess(100.0);
     setMaterial(m);

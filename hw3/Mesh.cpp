@@ -32,16 +32,30 @@ vector<glm::vec3> Mesh::calcTriangleNormals(vector<vector<size_t>> &vertexToTria
 }
 
 
-glm::vec3 Mesh::calcNormalMWA(const std::vector<size_t> &tvec, const std::vector<glm::vec3> &tN)
+glm::vec3 Mesh::calcNormalMWA(size_t vindex, const std::vector<size_t> &tvec, const std::vector<glm::vec3> &tN)
 {
     glm::vec3 normal(0.0, 0.0, 0.0);
 
     for (size_t i=0; i<tvec.size(); i++) {
         const size_t tindex = tvec[i];
         const Triangle &t = triangles[tindex];
-        const glm::vec3 &p1 = vertices[t.a];
-        const glm::vec3 &p2 = vertices[t.b];
-        const glm::vec3 &p3 = vertices[t.c];
+
+        glm::vec3 p1, p2, p3;
+
+        if (t.a == vindex) {
+            p1 = vertices[t.a];    
+            p2 = vertices[t.b];    
+            p3 = vertices[t.c];    
+        } else if (t.b == vindex) {
+            p1 = vertices[t.b];    
+            p2 = vertices[t.a];    
+            p3 = vertices[t.c];    
+        } else {
+            p1 = vertices[t.c];
+            p2 = vertices[t.a];    
+            p3 = vertices[t.b];    
+        }
+
         glm::vec3 edge1 = p2 - p1;
         glm::vec3 edge2 = p3 - p1;
         glm::vec3 edgecross = glm::cross(edge1, edge2);
@@ -133,7 +147,7 @@ void Mesh::calcNormalsMWA()
 
     for (size_t i=0; i<vertices.size(); i++) {
         const vector<size_t> &tvec = vtmap[i]; 
-        normals.push_back(calcNormalMWA(tvec, tN));
+        normals.push_back(calcNormalMWA(i, tvec, tN));
     }
 }
 

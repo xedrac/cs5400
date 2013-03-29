@@ -108,13 +108,18 @@ int main(int argc, char **argv)
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
         
-        Light light1(glm::vec3(0.0, 1.0, 2.0),  // position
-                     glm::vec3(1.0, 0.8, 0.8),  // diffuse
+        Light light1(glm::vec3(0.0, 1.0, 1.5),  // position
+                     glm::vec3(0.9, 1.0, 0.8),  // diffuse
                      glm::vec3(1.0, 1.0, 1.0)); // specular
+
+        //Light light2(glm::vec3(-1.0, 0.0, 0.3),
+        //             glm::vec3(1.0, 0.6, 0.6),
+        //             glm::vec3(1.0, 0.0, 0.0));
         
         scene.init();
-        scene.setAmbientLight(glm::vec3(0.2, 0.2, 0.2));
+        scene.setAmbientLight(glm::vec3(0.1, 0.1, 0.1));
         scene.addLight(light1);
+        //scene.addLight(light2);
         scene.loadObjectFromPly(filepath);
 
         camera.setScene(&scene);
