@@ -4,8 +4,6 @@
 #include "Program.hpp"
 #include "Scene.hpp"
 #include "Camera.hpp"
-#include "defs.h"
-
 #include <iostream>
 #include <vector>
 
