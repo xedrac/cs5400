@@ -52,12 +52,12 @@ void onKey(unsigned char key, int, int)
 void onSpecialKey(int key, int, int)
 {
     switch(key) {
-        case GLUT_KEY_PAGE_UP:   camera.roll(-1.0);  break;
-        case GLUT_KEY_PAGE_DOWN: camera.roll( 1.0);  break;
-        case GLUT_KEY_LEFT:      camera.yaw( 1.0);   break;
-        case GLUT_KEY_RIGHT:     camera.yaw(-1.0);   break;
-        case GLUT_KEY_UP:        camera.pitch( 1.0); break;
-        case GLUT_KEY_DOWN:      camera.pitch(-1.0); break;
+        case GLUT_KEY_PAGE_UP:   camera.roll(-1.5);  break;
+        case GLUT_KEY_PAGE_DOWN: camera.roll( 1.5);  break;
+        case GLUT_KEY_LEFT:      camera.yaw( 1.5);   break;
+        case GLUT_KEY_RIGHT:     camera.yaw(-1.5);   break;
+        case GLUT_KEY_UP:        camera.pitch( 1.5); break;
+        case GLUT_KEY_DOWN:      camera.pitch(-1.5); break;
         default:
             break;
     }
@@ -108,13 +108,18 @@ int main(int argc, char **argv)
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
         
-        Light light1(glm::vec3(0.0, 1.0, 2.0),  // position
-                     glm::vec3(1.0, 0.8, 0.8),  // diffuse
+        Light light1(glm::vec3(0.0, 1.0, 1.5),  // position
+                     glm::vec3(0.9, 1.0, 0.8),  // diffuse
                      glm::vec3(1.0, 1.0, 1.0)); // specular
+
+        //Light light2(glm::vec3(-1.0, 0.0, 0.3),
+        //             glm::vec3(1.0, 0.6, 0.6),
+        //             glm::vec3(1.0, 0.0, 0.0));
         
         scene.init();
-        scene.setAmbientLight(glm::vec3(0.2, 0.2, 0.2));
+        scene.setAmbientLight(glm::vec3(0.1, 0.1, 0.1));
         scene.addLight(light1);
+        //scene.addLight(light2);
         scene.loadObjectFromPly(filepath);
 
         camera.setScene(&scene);

@@ -87,9 +87,10 @@ shared_ptr<Mesh> parsePlyFile(const string &filename)
     ply_close(ply);
     printf("parsing complete\n");
 
-    mesh->calcNormalsMWE();
+    //mesh->calcNormalsMWE();
     //mesh->calcNormalsMWASEL();
     //mesh->calcNormalsMWA();
+    mesh->calcNormalsMWSA();
 
     return mesh;
 }

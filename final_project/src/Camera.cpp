@@ -26,7 +26,7 @@ void Camera::reset()
 {
     _lookdirection = glm::normalize(glm::vec3(0.0, 0.0,-1.0));
     _updirection   = glm::normalize(glm::vec3(0.0, 1.0, 0.0));
-    _position      = glm::vec3(0.0, 0.0, 1.0);
+    _position      = glm::vec3(0.0, 0.0, 0.3);
 
     _fieldofview   = 45.0f; // frustrum viewing apeture
     _aspectratio   = 4.0f/3.0f;
