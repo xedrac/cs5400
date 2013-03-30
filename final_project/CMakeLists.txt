@@ -9,10 +9,12 @@ find_package(OpenGL REQUIRED)
 set(CMAKE_CXX_FLAGS  "-g --std=c++0x -Wall")
 
 include_directories(
-    ${GLEW_INCLUDE_PATH}
+    ${GLUT_INCLUDE_DIR}
+    ${GLEW_INCLUDE_DIR}
+    ${OPENGL_INCLUDE_DIR}
     src
+    externals
     externals/parsers
-    externals/glm
     externals/lodepng)
 
 #link_directories()
@@ -31,7 +33,11 @@ add_executable(render
     externals/lodepng/lodepng.cpp
 )
 
-target_link_libraries(render ${GLUT_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES})
+target_link_libraries(render
+    ${GLUT_LIBRARIES}
+    ${GLEW_LIBRARIES}
+    ${OPENGL_LIBRARIES})
 
 file(COPY shaders DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY models  DESTINATION ${CMAKE_BINARY_DIR})
 
