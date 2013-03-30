@@ -17,7 +17,7 @@ public:
 
     // Load an object into the scene from a PLY file
     void loadObjectFromPly(const std::string &filename,
-                           glm::mat4 modelmatrix = glm::translate(glm::mat4(), glm::vec3(0.0, -0.1, 0.0)));
+                           glm::mat4 modelmatrix = glm::translate(glm::mat4(1.0), glm::vec3(0.0, -0.1, 0.0)));
 
     // Load the scene with PLY objects
     void clear();
@@ -35,6 +35,12 @@ public:
                 const glm::vec3 &lookdirection,
                 const glm::vec3 &updirection,
                 const glm::mat4 &projectionmatrix);
+
+	// update state of all objects in the scene
+	void updateObjectState();
+
+	// refreshes time before starting a scene render after models have been loaded
+	void refreshTime();
 
     std::shared_ptr<cs5400::Program> getProgram() { return _program; }
 
@@ -65,6 +71,7 @@ private:
     GLuint _glSceneAmbient;
 
     GLuint _glCameraPosition;
+	int _lastUpdate;
 };
 
 

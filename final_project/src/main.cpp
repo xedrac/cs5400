@@ -66,18 +66,19 @@ void onSpecialKey(int key, int, int)
  
 void onIdle(void)
 {
-  
+  scene.updateObjectState();
+  glutPostRedisplay();
 }
- 
  
 int main(int argc, char **argv)
 {
+	string filepath;
     if (argc < 2) {
-        cerr << "\n\n\tSyntax: " << argv[0] << " <plyfile>\n\n";
-        return EXIT_FAILURE;
+		filepath = "bunny.ply";
     }
-
-    string filepath = argv[1];
+	else {
+		filepath = argv[1];
+	}
 
     // Glut-related initialising functions
     glutInit(&argc, argv);
@@ -120,6 +121,7 @@ int main(int argc, char **argv)
         //scene.addLight(light2);
         scene.loadObjectFromPly(filepath);
 
+		scene.refreshTime();
         camera.setScene(&scene);
         camera.render();
         glutMainLoop();

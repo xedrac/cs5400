@@ -40,13 +40,15 @@ void Scene::init()
     _glCameraPosition     = glGetUniformLocation(handle, "camerapos_ws");
 
     _ambientlight = glm::vec3(0.2, 0.2, 0.2);
+
+	_lastUpdate = glutGet(GLUT_ELAPSED_TIME);
 }
 
 
 void Scene::loadObjectFromPly(const string &filename, glm::mat4 modelmatrix)
 {
     shared_ptr<Mesh> mesh = parsePlyFile(filename); 
-    RenderedObject obj(_program->getHandle(), mesh);
+    RenderedObject obj(_program->getHandle(), mesh, 0.00005); // arbitrary speed for PLY object
     obj.setModelMatrix(modelmatrix);
     _objects.push_back(obj);
 }
@@ -122,3 +124,32 @@ void Scene::render(const glm::vec3 &eyeposition,
     }
 }
 
+// update state of all objects
+void Scene::updateObjectState() 
+{
+	// get elapsed ms since last update
+	int msDiff = glutGet(GLUT_ELAPSED_TIME) - _lastUpdate;
+
+	bool keepDirection = true;
+	// update all objects' state
+	for (size_t i=0; i<_objects.size(); i++) {
+        keepDirection = _objects[i].update(msDiff);
+		if (!keepDirection)
+		{
+			// need to change direction of all objects in the scene
+			for (size_t j=0; j<_objects.size(); j++) {
+				_objects[j].changeDirection();
+			}
+			keepDirection = true;
+		}
+    }
+
+	// set new last update time
+	_lastUpdate = glutGet(GLUT_ELAPSED_TIME);
+} 
+
+// refreshes time before starting a scene render after models have been loaded
+void Scene::refreshTime()
+{
+	_lastUpdate = glutGet(GLUT_ELAPSED_TIME);
+}

@@ -14,7 +14,7 @@
 
 class RenderedObject {
 public:
-    RenderedObject(GLuint program, std::shared_ptr<Mesh> mesh);
+    RenderedObject(GLuint program, std::shared_ptr<Mesh> mesh, GLfloat speed);
 
     // Rotate the object along the arbitrary axis, by 'theta' degrees
     void rotate(glm::vec3 axis, double theta);
@@ -34,6 +34,12 @@ public:
     // Render the object
     void render(GLuint modelmatrixid, GLuint modelinvtranspmatrixid);
 
+	// Update the object state, returns false if direction needs to change
+	bool update(DWORD msDiff);
+
+	// notifies the object to change direction
+	void changeDirection();
+
     // Access the mesh data (probably should enforce const or something)
     std::shared_ptr<Mesh> getMesh() { return _mesh; }
 
@@ -46,6 +52,10 @@ private:
     std::shared_ptr<Mesh> _mesh;
     glm::mat4 _modelmatrix;
     glm::mat3 _modelinvtranspmatrix;
+	glm::vec3 _position;
+	glm::vec3 _rotation;
+	GLfloat _speed;
+	GLint _direction; // probably just 0 or 1 but room for expansion
     bool _visible;
 
     GLuint _glvertexbuffer;

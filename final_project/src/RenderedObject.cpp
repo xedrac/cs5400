@@ -1,4 +1,3 @@
-
 #include <vector>
 #include <GL/glew.h>
 #include "RenderedObject.hpp"
@@ -10,9 +9,13 @@
 using namespace std;
 
 
-RenderedObject::RenderedObject(GLuint program, std::shared_ptr<Mesh> mesh)
+RenderedObject::RenderedObject(GLuint program, std::shared_ptr<Mesh> mesh, GLfloat speed)
     : _mesh(mesh),
-      _visible(true)
+      _visible(true),
+	  _speed(speed),
+	  _direction(0), // might want to be able to pass this in, but for now we'll default to one direction
+	  _position(glm::vec3(0.0, 0.0, 0.0)),
+	  _rotation(glm::vec3(0.0, 0.0, 0.0))
 {
     setModelMatrix(glm::mat4(1.0));
 
@@ -89,14 +92,22 @@ void RenderedObject::storeMesh()
 // Rotate the object along the arbitrary axis, by 'theta' degrees
 void RenderedObject::rotate(glm::vec3 axis, double theta)
 {
-    
+    if (axis.x > 0) {
+		_rotation.x += theta;
+	}
+	if (axis.y > 0) {
+		_rotation.y += theta;
+	}
+	if (axis.z > 0) {
+		_rotation.z += theta;
+	}
 }
 
 
 // Move the object along the x, y, and z axes in the amount specified
 void RenderedObject::translate(glm::vec3 xyz)
 {
-
+	_position += xyz;
 }
 
 
@@ -129,7 +140,13 @@ void RenderedObject::render(GLuint modelmatrixid, GLuint modelinvtranspmatrixid)
     if (!_visible)
         return;
 
-    glUniformMatrix4fv(modelmatrixid, 1, GL_FALSE, glm::value_ptr(_modelmatrix));
+	// do model transformations
+	glm::mat4 modelTranslate = glm::translate(_modelmatrix, _position);
+	glm::mat4 modelRotateX = glm::rotate(modelTranslate, _rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+	glm::mat4 modelRotateY = glm::rotate(modelRotateX, _rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 model = glm::rotate(modelRotateY, _rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+
+    glUniformMatrix4fv(modelmatrixid, 1, GL_FALSE, glm::value_ptr(model));
 
     glUniformMatrix3fv(modelinvtranspmatrixid, 1, GL_FALSE, glm::value_ptr(_modelinvtranspmatrix));
 
@@ -158,3 +175,30 @@ void RenderedObject::render(GLuint modelmatrixid, GLuint modelinvtranspmatrixid)
     glUniform4f(_glspecular, specular.r, specular.g, specular.b, ambient.w);
 }
 
+// Update the object's state. Returns false if direction needs to change
+bool RenderedObject::update(DWORD msDiff)
+{
+	if (_direction == 0)
+	{
+		this->rotate(glm::vec3(0.0, 1.0, 0.0), this->_speed * 500 * msDiff);
+		this->translate(glm::vec3(_speed * msDiff, 0.0, 0.0));
+		return !(this->_position.x > 0.11);
+	}
+	else
+	{
+		this->rotate(glm::vec3(0.0, 1.0, 0.0), this->_speed * -500 * msDiff);
+		this->translate(glm::vec3(-_speed * msDiff, 0.0, 0.0));
+		return !(this->_position.x < -0.09);
+	}
+
+	// rules to change direction -- earlier discussion was if invisible bounding walls were hit
+	// moved up into above logic branch to prevent sticky boundary problem
+	//return !(this->_position.x > 0.11) && !(this->_position.x < -0.09);
+}
+
+// Change the object's direction
+void RenderedObject::changeDirection()
+{
+	// simple 0 <-> 1 for now
+	_direction = _direction ^ 1;
+}
