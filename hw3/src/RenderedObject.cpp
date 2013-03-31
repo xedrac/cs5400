@@ -12,21 +12,24 @@ using namespace std;
 
 RenderedObject::RenderedObject(GLuint program, std::shared_ptr<Mesh> mesh)
     : _mesh(mesh),
-      _visible(true)
+      _visible(true),
+      _texture("../textures/mycheckered_darkest.png")
 {
     setModelMatrix(glm::mat4(1.0));
 
     glGenBuffers(1, &_glvertexbuffer);
     glGenBuffers(1, &_glnormalbuffer);
     glGenBuffers(1, &_glmeshbuffer);
+    glGenBuffers(1, &_gluvbuffer);
 
-    _glvertexattrib = glGetAttribLocation(program, "vertex_coord");
-    _glnormalattrib = glGetAttribLocation(program, "vertex_normal");
-
-    _glshininess    = glGetUniformLocation(program, "shininess");
-    _glambient      = glGetUniformLocation(program, "materialambient");
-    _gldiffuse      = glGetUniformLocation(program, "materialdiffuse");
-    _glspecular     = glGetUniformLocation(program, "materialspecular");
+    _glvertexattrib   = glGetAttribLocation (program, "vertex_coord");
+    _glnormalattrib   = glGetAttribLocation (program, "vertex_normal");
+    _gluvattrib       = glGetAttribLocation (program, "uv_coord");
+    _glshininess      = glGetUniformLocation(program, "shininess");
+    _glambient        = glGetUniformLocation(program, "materialambient");
+    _gldiffuse        = glGetUniformLocation(program, "materialdiffuse");
+    _glspecular       = glGetUniformLocation(program, "materialspecular");
+    _gltexturesampler = glGetUniformLocation(program, "texturesampler");
 
     Material m;
     m.setAmbient(glm::vec3(0.2, 0.2, 0.2));
@@ -38,7 +41,29 @@ RenderedObject::RenderedObject(GLuint program, std::shared_ptr<Mesh> mesh)
     storePoints();
     storeNormals();
     storeMesh();
+    storeTextureCoords();
 }
+
+
+// Store the texture coordinates in a GPU buffer
+// Currently we fake the coordinates with the 
+// vertex data since PLY files don't provide them
+void RenderedObject::storeTextureCoords()
+{
+    const vector<glm::vec3> &verts = _mesh->vertices;
+
+    vector<GLfloat> uvcoords;
+    for (size_t k=0; k<verts.size(); k++) {
+        const glm::vec3 &v = verts[k];
+        uvcoords.push_back(v.x*32);
+        uvcoords.push_back(v.y*32);
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, _gluvbuffer);
+    glBufferData(GL_ARRAY_BUFFER, uvcoords.size()*sizeof(GLfloat), &uvcoords[0], GL_STATIC_DRAW);
+
+}
+
 
 // Store the vertices in a GPU buffer
 void RenderedObject::storePoints()
@@ -129,6 +154,8 @@ void RenderedObject::render(GLuint modelmatrixid, GLuint modelinvtranspmatrixid)
     if (!_visible)
         return;
 
+    _texture.bindTexture();
+
     glUniformMatrix4fv(modelmatrixid, 1, GL_FALSE, glm::value_ptr(_modelmatrix));
 
     glUniformMatrix3fv(modelinvtranspmatrixid, 1, GL_FALSE, glm::value_ptr(_modelinvtranspmatrix));
@@ -142,10 +169,19 @@ void RenderedObject::render(GLuint modelmatrixid, GLuint modelinvtranspmatrixid)
     glBindBuffer(GL_ARRAY_BUFFER, _glnormalbuffer);
     glVertexAttribPointer(_glnormalattrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
+    glEnableVertexAttribArray(_gluvattrib);
+    glBindBuffer(GL_ARRAY_BUFFER, _gluvbuffer);
+    glVertexAttribPointer(_gluvattrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, _texture.textureId());
+    glUniform1i(_gltexturesampler, 0);
+
     glDrawElements(GL_TRIANGLES, _mesh->triangles.size()*3, GL_UNSIGNED_INT, 0);
 
     glDisableVertexAttribArray(_glvertexattrib);
     glDisableVertexAttribArray(_glnormalattrib);
+    glDisableVertexAttribArray(_gluvattrib);
 
     GLfloat shininess  = _material.getShininess();
     glm::vec4 ambient  = glm::vec4(_material.getAmbient(), 1.0);

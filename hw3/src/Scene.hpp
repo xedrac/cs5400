@@ -63,6 +63,7 @@ private:
     GLuint _glLightSpotDirection;
     GLuint _glLightCount;
     GLuint _glSceneAmbient;
+    GLuint _glTextureSampler;
 
     GLuint _glCameraPosition;
 };

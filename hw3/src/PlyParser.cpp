@@ -2,9 +2,8 @@
 #include <string.h>
 #include <list>
 #include "glm/glm.hpp"
-#include "Util.hpp"
-#include "ply.h"
 #include "PlyParser.hpp"
+#include "Util.hpp"
 
 using namespace std;
 

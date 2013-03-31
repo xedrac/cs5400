@@ -36,8 +36,9 @@ void Scene::init()
     _glLightSpotDirection = glGetUniformLocation(handle, "lightspotdirection");
     _glLightCount         = glGetUniformLocation(handle, "lightcount");
     _glSceneAmbient       = glGetUniformLocation(handle, "sceneambient");
+    _glTextureSampler     = glGetUniformLocation(handle, "texturesampler");
 
-    _glCameraPosition     = glGetUniformLocation(handle, "camerapos_ws");
+    _glCameraPosition = glGetUniformLocation(handle, "camerapos_ws");
 
     _ambientlight = glm::vec3(0.2, 0.2, 0.2);
 }
