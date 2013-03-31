@@ -3,7 +3,7 @@
 #include <list>
 #include "glm/glm.hpp"
 #include "Util.hpp"
-#include "ply.h"
+#include "parsers/ply/ply.h"
 #include "PlyParser.hpp"
 
 using namespace std;

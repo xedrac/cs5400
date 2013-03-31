@@ -39,7 +39,7 @@ Modified by Shawn Badger
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include <ply.h>
+#include "parsers/ply/ply.h"
 
 char *type_names[] = {
 "invalid",

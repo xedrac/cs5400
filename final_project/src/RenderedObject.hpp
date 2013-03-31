@@ -6,6 +6,7 @@
 #include "glm/glm.hpp"
 #include "Mesh.hpp"
 #include "Material.hpp"
+#include "Texture.hpp"
 
 // This is the base class for any object that is to
 // be rendered in the scene.  It knows how to render
@@ -35,7 +36,7 @@ public:
     void render(GLuint modelmatrixid, GLuint modelinvtranspmatrixid);
 
 	// Update the object state, returns false if direction needs to change
-	bool update(DWORD msDiff);
+	bool update(int msDiff);
 
 	// notifies the object to change direction
 	void changeDirection();
@@ -47,6 +48,7 @@ private:
     void storePoints();
     void storeNormals();
     void storeMesh();
+    void storeTextureCoords();
 
 private:
     std::shared_ptr<Mesh> _mesh;
@@ -61,9 +63,12 @@ private:
     GLuint _glvertexbuffer;
     GLuint _glnormalbuffer;
     GLuint _glmeshbuffer;
+    GLuint _gluvbuffer;
+    GLuint _gltexturesampler;
 
     GLint _glvertexattrib;
     GLint _glnormalattrib;
+    GLint _gluvattrib;
 
     GLuint _glshininess;
     GLuint _glambient;
@@ -71,6 +76,7 @@ private:
     GLuint _glspecular;
 
     Material _material;
+    Texture _texture;
 };
 
 

@@ -13,9 +13,7 @@ include_directories(
     ${GLEW_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
     src
-    externals
-    externals/parsers
-    externals/lodepng)
+    externals)
 
 #link_directories()
 
@@ -29,8 +27,8 @@ add_executable(render
     src/Camera.cpp
     src/RenderedObject.cpp
     src/PlyParser.cpp
-    externals/parsers/ply.c
-    externals/lodepng/lodepng.cpp
+    src/Texture.cpp
+    externals/parsers/ply/ply.c
 )
 
 target_link_libraries(render

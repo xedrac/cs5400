@@ -153,3 +153,4 @@ void Scene::refreshTime()
 {
 	_lastUpdate = glutGet(GLUT_ELAPSED_TIME);
 }
+
