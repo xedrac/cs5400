@@ -23,8 +23,7 @@ uniform sampler2D texturesampler;
 vec4 shade()
 {
     vec3 normaldirection = normalize(normal_ws);
-    //vec3 viewdirection   = normalize((V_inv * camerapos_ws - position_ws).xyz);
-    vec3 viewdirection   = normalize((camerapos_ws - position_ws).xyz);
+    vec3 viewdirection   = normalize((V_inv * camerapos_ws - position_ws).xyz);
     vec3 fragcolor       = vec3(0.0, 0.0, 0.0);
 
     for (int i=0; i<lightcount; i++) {
