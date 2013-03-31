@@ -2,14 +2,15 @@ Build Instructions:
 =============================
 - Extract the source code
 
-- From the source directory, run the command "cmake ."  (don't forget the dot!)
+- Create a "build" directory next to the CMakeLists.txt file
+- From the build directory, run "cmake .."
 - For Linux/MacOS, just run 'make' to compile
 - For Windows, a Visual Studio project file is generated
-- Run the 'render' program
+- Run the 'render' program with a ply file as an argument
 
 
 
-Directions for moving camera:
+Directions for moving camera: (Yeah, I know they suck)
 ==============================
 
     Action       Key
