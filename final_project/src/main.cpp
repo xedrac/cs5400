@@ -119,7 +119,8 @@ int main(int argc, char **argv)
         scene.setAmbientLight(glm::vec3(0.1, 0.1, 0.1));
         scene.addLight(light1);
         //scene.addLight(light2);
-        scene.loadObjectFromPly(filepath);
+        scene.loadObjectFromPly(filepath, 0);
+		scene.loadObjectFromPly(filepath, 1);
 
 		scene.refreshTime();
         camera.setScene(&scene);

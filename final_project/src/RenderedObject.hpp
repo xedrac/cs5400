@@ -7,6 +7,7 @@
 #include "Mesh.hpp"
 #include "Material.hpp"
 #include "Texture.hpp"
+#include "BoundingBox.hpp"
 
 // This is the base class for any object that is to
 // be rendered in the scene.  It knows how to render
@@ -40,6 +41,13 @@ public:
 
 	// notifies the object to change direction
 	void changeDirection();
+
+	BoundingBox bounds;
+
+	// true if this intersects any object in the set
+	bool intersects(std::vector<RenderedObject>* set);
+
+	glm::mat4 getTransformationMatrix(bool includeRotation);
 
     // Access the mesh data (probably should enforce const or something)
     std::shared_ptr<Mesh> getMesh() { return _mesh; }

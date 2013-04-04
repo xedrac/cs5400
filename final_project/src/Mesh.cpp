@@ -196,3 +196,23 @@ void Mesh::calcNormalsMWSA()
         normals.push_back(calcNormalMWSA(tvec, tN));
     }
 }
+
+// Naive method to calculate xy square around object
+glm::vec4 Mesh::calcBounds()
+{
+	// x_min, x_max, y_min, y_max
+	glm::vec4 result = glm::vec4(1000, -1000, 1000, -1000);
+	glm::vec3* item;
+	for (size_t i=0; i<vertices.size(); i++) {
+		item = &vertices[i];
+		if (item->x < result.x)
+			result.x = item->x;
+		else if (item-> x > result.y)
+			result.y = item->x;
+		if (item->y < result.z)
+			result.z = item->y;
+		else if (item->y > result.w)
+			result.w = item->y;
+    }
+	return result;
+}

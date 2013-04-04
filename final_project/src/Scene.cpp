@@ -45,11 +45,17 @@ void Scene::init()
 }
 
 
-void Scene::loadObjectFromPly(const string &filename, glm::mat4 modelmatrix)
+void Scene::loadObjectFromPly(const string &filename, int direction, glm::mat4 modelmatrix)
 {
     shared_ptr<Mesh> mesh = parsePlyFile(filename); 
+	glm::vec4 box = mesh->calcBounds();
     RenderedObject obj(_program->getHandle(), mesh, 0.00005); // arbitrary speed for PLY object
     obj.setModelMatrix(modelmatrix);
+	obj.translate(glm::vec3(0.0, -0.1, 0.0)); // adding this since I temporarily removed transformation based on setModelMatrix
+	if (direction > 0)
+		obj.changeDirection(); // adding this for collision demo
+	obj.bounds = BoundingBox(box);
+	obj.bounds.id = direction;
     _objects.push_back(obj);
 }
 
@@ -143,6 +149,23 @@ void Scene::updateObjectState()
 			keepDirection = true;
 		}
     }
+
+	// check for collisions
+	// NOTE: As we progress, we should only check objects that can intersect (e.g. enemy projectiles and player) but for demo we'll check everything
+	bool collision = false;
+	for (size_t i=0; i<_objects.size(); i++) {
+		if (_objects[i].intersects(&_objects))
+		{
+			collision = true;
+			break;
+		}
+	}
+	
+	// for demo, if we have a collision we'll change light to red, otherwise the green
+	if (collision)
+		_lights[0].setDiffuse(glm::vec3(1.0, 0.2, 0.2));
+	else
+		_lights[0].setDiffuse(glm::vec3(0.9, 1.0, 0.8));
 
 	// set new last update time
 	_lastUpdate = glutGet(GLUT_ELAPSED_TIME);

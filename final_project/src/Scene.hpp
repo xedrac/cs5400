@@ -16,7 +16,7 @@ public:
     void init();
 
     // Load an object into the scene from a PLY file
-    void loadObjectFromPly(const std::string &filename,
+    void loadObjectFromPly(const std::string &filename, int direction, 
                            glm::mat4 modelmatrix = glm::translate(glm::mat4(1.0), glm::vec3(0.0, -0.1, 0.0)));
 
     // Load the scene with PLY objects

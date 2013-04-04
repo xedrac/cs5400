@@ -46,6 +46,8 @@ public:
     // (0,1,2), (3,4,5) ...  are indexes for triangles
     std::vector<Triangle> triangles;
 
+	glm::vec4 calcBounds();
+
  private:
     std::vector<glm::vec3> calcTriangleNormals(std::vector<std::vector<size_t>> &vertexToTrianglesMap);
     glm::vec3 calcNormalMWASEL(const std::vector<size_t> &tvec, const std::vector<glm::vec3> &tN);

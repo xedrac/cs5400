@@ -165,15 +165,13 @@ void RenderedObject::render(GLuint modelmatrixid, GLuint modelinvtranspmatrixid)
 
     _texture.bindTexture();
 
-	// do model transformations
-	glm::mat4 modelTranslate = glm::translate(_modelmatrix, _position);
-	glm::mat4 modelRotateX = glm::rotate(modelTranslate, _rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-	glm::mat4 modelRotateY = glm::rotate(modelRotateX, _rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-	glm::mat4 model = glm::rotate(modelRotateY, _rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	glm::mat4 transformMatrix = getTransformationMatrix(true);
 
-    glUniformMatrix4fv(modelmatrixid, 1, GL_FALSE, glm::value_ptr(model));
-
-    glUniformMatrix3fv(modelinvtranspmatrixid, 1, GL_FALSE, glm::value_ptr(_modelinvtranspmatrix));
+	// below line should reference _modelmatrix after gamestate refactor
+    glUniformMatrix4fv(modelmatrixid, 1, GL_FALSE, glm::value_ptr(transformMatrix));
+	glm::mat3 invModel = glm::inverseTranspose(glm::mat3(transformMatrix));
+	// below line should reference _modelinvtranspmatrix after gamestate refactor
+    glUniformMatrix3fv(modelinvtranspmatrixid, 1, GL_FALSE, glm::value_ptr(invModel));
 
     glEnableVertexAttribArray(_glvertexattrib);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glmeshbuffer);
@@ -212,17 +210,23 @@ void RenderedObject::render(GLuint modelmatrixid, GLuint modelinvtranspmatrixid)
 // Update the object's state. Returns false if direction needs to change
 bool RenderedObject::update(int msDiff)
 {
+	// first update this object's bounding box
+	glm::mat4 matrix = getTransformationMatrix(false);
+	bounds.update(matrix);
+
 	if (_direction == 0)
 	{
-		this->rotate(glm::vec3(0.0, 1.0, 0.0), this->_speed * 500 * msDiff);
+		//this->rotate(glm::vec3(0.0, 1.0, 0.0), this->_speed * 500 * msDiff);
 		this->translate(glm::vec3(_speed * msDiff, 0.0, 0.0));
-		return !(this->_position.x > 0.11);
+		//return !(this->_position.x > 0.11);
+		return !(this->_position.x > 0.15); // make it bigger to show off collision
 	}
 	else
 	{
-		this->rotate(glm::vec3(0.0, 1.0, 0.0), this->_speed * -500 * msDiff);
+		//this->rotate(glm::vec3(0.0, 1.0, 0.0), this->_speed * -500 * msDiff);
 		this->translate(glm::vec3(-_speed * msDiff, 0.0, 0.0));
-		return !(this->_position.x < -0.09);
+		//return !(this->_position.x < -0.09);
+		return !(this->_position.x < -0.13); // make it bigger to show off collision
 	}
 
 	// rules to change direction -- earlier discussion was if invisible bounding walls were hit
@@ -235,4 +239,31 @@ void RenderedObject::changeDirection()
 {
 	// simple 0 <-> 1 for now
 	_direction = _direction ^ 1;
+}
+
+
+// Naive implementation
+bool RenderedObject::intersects(std::vector<RenderedObject>* set)
+{
+	for(size_t i = 0; i < set->size(); i++) {
+		if (bounds.intersects(&set->at(i).bounds))
+			return true;
+	}
+	return false;
+}
+
+glm::mat4 RenderedObject::getTransformationMatrix(bool includeRotation)
+{
+	glm::mat4 modelTranslate = glm::translate(glm::mat4(1.0), _position);
+	if (includeRotation)
+	{
+		glm::mat4 modelRotateX = glm::rotate(modelTranslate, _rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+		glm::mat4 modelRotateY = glm::rotate(modelRotateX, _rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 model = glm::rotate(modelRotateY, _rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		return model;
+	}
+	else
+	{
+		return modelTranslate;
+	}
 }
