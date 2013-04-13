@@ -29,9 +29,9 @@ void Camera::reset()
     _position      = glm::vec3(0.0, 0.0, 0.3);
 
     _fieldofview   = 45.0f; // frustrum viewing apeture
-    _aspectratio   = 4.0f/3.0f;
-    _nearfieldclip = 0.1;   // clip anything closer than this
-    _farfieldclip  = 50.0; // clip anything farther than this
+    _aspectratio   = 16.0f/10.0f;
+    _nearfieldclip = 0.01; // clip anything closer than this
+    _farfieldclip  = 10.0; // clip anything farther than this
     _projection    = glm::perspective(_fieldofview, _aspectratio, _nearfieldclip, _farfieldclip);
 }
 

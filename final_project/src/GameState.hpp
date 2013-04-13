@@ -28,6 +28,7 @@ public:
 
 private:
     std::shared_ptr<Mesh> loadMesh(const std::string &name, const std::string &filename);
+    void loadEnemyShips(std::shared_ptr<Mesh> mesh, int enemyrows, int enemycols, float speed, float scale);
     void addEnemy(std::shared_ptr<Spaceship> enemy);
 	void updateObjectState();  // update all objects in scene
 	void refreshTime();        // refresh time before starting a scene render (after models are added)

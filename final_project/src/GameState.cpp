@@ -27,48 +27,28 @@ void GameState::init()
     _scene.setAmbientLight(glm::vec3(0.1, 0.1, 0.1));
 
     shared_ptr<Mesh> bunnymesh  = loadMesh("bunny",  "models/bunny.ply");
-    shared_ptr<Mesh> dragonmesh = loadMesh("dragon", "models/dragon.ply");
+    //shared_ptr<Mesh> dragonmesh = loadMesh("dragon", "models/dragon.ply");
 
-    shared_ptr<Spaceship> enemy1 = make_shared<Spaceship>(_program->getHandle(),
-                                                          bunnymesh,
-                                                          glm::vec3(-0.1f, 0.05f, 0.0f), // position
-                                                          glm::vec3( 0.2f, 0.2f,  0.2f), // scale
-                                                          glm::vec3( 0.0f, 0.0f,  0.0f), // rotation
-                                                          1,                             // direction
-                                                          0.00005);                      // speed
-
-    shared_ptr<Spaceship> enemy2 = make_shared<Spaceship>(_program->getHandle(),
-                                                          bunnymesh,
-                                                          glm::vec3( 0.0f, 0.05f, 0.0f), // position
-                                                          glm::vec3( 0.2f, 0.2f,  0.2f), // scale
-                                                          glm::vec3( 0.0f, 0.0f,  0.0f), // rotation
-                                                          1,                             // direction
-                                                          0.00005);                      // speed
-
-    shared_ptr<Spaceship> enemy3 = make_shared<Spaceship>(_program->getHandle(),
-                                                          bunnymesh,
-                                                          glm::vec3( 0.1f, 0.05f, 0.0f), // position
-                                                          glm::vec3( 0.2f, 0.2f,  0.2f), // scale
-                                                          glm::vec3( 0.0f, 0.0f,  0.0f), // rotation
-                                                          1,                             // direction
-                                                          0.00005);                      // speed
-    addEnemy(enemy1);
-    addEnemy(enemy2);
-    addEnemy(enemy3);
+    int enemyrows = 5;
+    int enemycols = 12;
+    float enemyspeed = 0.0002;
+    float enemyscale = 0.55;
+    loadEnemyShips(bunnymesh, enemyrows, enemycols, enemyspeed, enemyscale);
 
     _playership = make_shared<Spaceship>(_program->getHandle(),
-                                         dragonmesh,
-                                         glm::vec3(0.0f, -0.2f,  0.0f ), // position
-                                         glm::vec3(0.01f, 0.01f, 0.01f), // scale
-                                         glm::vec3(0.0f,  0.0f,  0.0f ), // rotation
-                                         -1,                             // direction
-                                         0.00007);                       // speed
+                                         bunnymesh,
+                                         glm::vec3(0.0f, -0.7f, 0.0f ), // position
+                                         glm::vec3(0.4f,  0.4f, 0.4f),  // scale
+                                         glm::vec3(0.0f,  0.0f, 0.0f ), // rotation
+                                         -1,                            // direction
+                                         0.0001);                       // speed
     _playership->setId(_scene.getNewObjectId());
     _scene.insertObject(_playership);
 
     refreshTime();
 
     _camera.setScene(&_scene);
+    _camera.setPosition(glm::vec3(0.0f, 0.0f, 1.8f));
     _camera.render();
 
 	_lastupdate = glutGet(GLUT_ELAPSED_TIME);
@@ -147,16 +127,20 @@ void GameState::updateObjectState()
 	int elapsedms = glutGet(GLUT_ELAPSED_TIME) - _lastupdate;
 	bool keepDirection = true;
 
-	// update all objects' state
+	// update all objects' state.  If one enemy changes direction,
+    // make all enemies change direction (space invaders!)
     for (size_t i=0; i<_enemyships.size(); i++) {
-        keepDirection = _enemyships[i]->update(elapsedms);
-        if (!keepDirection) {
-            for (size_t k=0; k<_enemyships.size(); k++) {
-                _enemyships[k]->changeDirection();
-            }
-            keepDirection = true;
+        if (_enemyships[i]->update(elapsedms) == false) {
+            keepDirection = false;
         }
     }
+
+    if (!keepDirection) {
+        for (size_t i=0; i<_enemyships.size(); i++)
+            _enemyships[i]->changeDirection();
+    }
+
+    _playership->update(elapsedms);
 
 	// check if playership collides with enemy ships
     //Material normalMat(...); 
@@ -204,7 +188,40 @@ void GameState::addEnemy(shared_ptr<Spaceship> enemy)
 
 
 
+void GameState::loadEnemyShips(shared_ptr<Mesh> mesh, int enemyrows, int enemycols, float speed, float scale)
+{
+    shared_ptr<Spaceship> enemy;
 
+    // Limit the max rows/cols
+    if (enemycols > 20) enemycols = 20;
+    if (enemyrows > 10) enemyrows = 10;
+
+    // half of the columns minus the center column
+    int halfcols = (int)(enemycols / 2);
+    int halfrows = (int)(enemyrows / 2);
+
+    float screenwidth = 1.8;  // (-1.0, 1.0)
+    float halfwidth = screenwidth / 2.0f;
+    float xgap = screenwidth / enemycols;
+
+    for (int row=0; row<enemyrows; row++) {
+        float ypos = (row - halfrows) * 0.1 + 0.4;
+        for (int col=0; col<enemycols; col++) {
+            float xpos = col*xgap - halfwidth;
+            //float xpos = (col - halfcols) * 0.1;
+            enemy = make_shared<Spaceship>(_program->getHandle(),
+                                           mesh,
+                                           glm::vec3(xpos, ypos, 0.0f), // position
+                                           glm::vec3(scale),            // scale
+                                           glm::vec3(0.0f, 0.0f, 0.0f), // rotation
+                                           1,                           // direction
+                                           speed);                      // speed
+            addEnemy(enemy);
+
+
+        }
+    }
+}
 
 
 

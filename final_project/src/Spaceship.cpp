@@ -18,7 +18,7 @@ Spaceship::Spaceship(GLuint program,
                      float speed)
     : RenderedObject(program, mesh, position, scale, rotation),
 	  _speed(speed),
-	  _direction(0)  // might want to be able to pass this in, but for now we'll default to one direction
+	  _direction(direction)
 {
     Material m;
     m.setAmbient(glm::vec3(0.2, 0.2, 0.2));
@@ -37,17 +37,22 @@ bool Spaceship::update(int elapsedms)
     _boundingbox.update(getModelMatrix());
     glm::vec3 position = getPosition();
 
-	if (_direction == 0) {
-		//this->rotate(glm::vec3(0.0, 1.0, 0.0), this->_speed * 500 * elapsedms);
-		translate(glm::vec3(_speed * elapsedms, 0.0, 0.0));
-		//return !(this->_position.x > 0.11);
-		return !(position.x > 0.15); // make it bigger to show off collision
-	} else {
-		//this->rotate(glm::vec3(0.0, 1.0, 0.0), this->_speed * -500 * elapsedms);
-		translate(glm::vec3(-_speed * elapsedms, 0.0, 0.0));
-		//return !(this->_position.x < -0.09);
-		return !(position.x < -0.13); // make it bigger to show off collision
-	}
+    bool keepdirection = true;
+
+    switch (_direction) {
+        case 0:
+            translate(glm::vec3( _speed * elapsedms, 0.0, 0.0));
+            keepdirection = !(position.x > 1.0);
+            break;
+        case 1:
+            translate(glm::vec3(-_speed * elapsedms, 0.0, 0.0));
+            keepdirection = !(position.x < -1.0);
+            break;
+        default:
+            break;
+    }
+
+    return keepdirection;
 }
 
 // Change the object's direction
@@ -56,32 +61,3 @@ void Spaceship::changeDirection()
 	// simple 0 <-> 1 for now
 	_direction = _direction ^ 1;
 }
-
-
-#if 0
-// Naive implementation
-bool Spaceship::intersects(std::vector<Spaceship>* set)
-{
-	for(size_t i = 0; i < set->size(); i++) {
-		if (bounds.intersects(&set->at(i).bounds))
-			return true;
-	}
-	return false;
-}
-
-glm::mat4 Spaceship::getTransformationMatrix(bool includeRotation)
-{
-	glm::mat4 modelTranslate = glm::translate(glm::mat4(1.0), _position);
-	if (includeRotation)
-	{
-		glm::mat4 modelRotateX = glm::rotate(modelTranslate, _rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-		glm::mat4 modelRotateY = glm::rotate(modelRotateX, _rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-		glm::mat4 model = glm::rotate(modelRotateY, _rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-		return model;
-	}
-	else
-	{
-		return modelTranslate;
-	}
-}
-#endif

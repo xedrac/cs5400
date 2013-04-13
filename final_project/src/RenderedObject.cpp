@@ -49,6 +49,8 @@ RenderedObject::RenderedObject(GLuint program,
     storeNormals();
     storeMesh();
     storeTextureCoords();
+
+    calculateModelMatrix();
 }
 
 // Store the texture coordinates in a GPU buffer
