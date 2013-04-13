@@ -2,7 +2,7 @@
 #define SCENE_HPP
 
 #include <GL/glew.h>
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "Program.hpp"
@@ -11,7 +11,10 @@
 #include <vector>
 
 
-class Scene {
+
+
+class Scene
+{
 public:
     void init();
 
@@ -30,17 +33,17 @@ public:
     void setAmbientLight(const glm::vec3 &rgb) { _ambientlight = rgb; }
 
 
+    // Returns a new id to represent an object in the scene
+    objectid_t getNewObjectId();
+    void insertObject(object_t obj);
+    void removeObject(object_t obj);
+
     // render all of the objects in the scene
     void render(const glm::vec3 &eyeposition,
                 const glm::vec3 &lookdirection,
                 const glm::vec3 &updirection,
                 const glm::mat4 &projectionmatrix);
 
-	// update state of all objects in the scene
-	void updateObjectState();
-
-	// refreshes time before starting a scene render after models have been loaded
-	void refreshTime();
 
     std::shared_ptr<cs5400::Program> getProgram() { return _program; }
 
@@ -48,7 +51,7 @@ private:
     std::shared_ptr<cs5400::Program> _program;
     
     // All objects to be rendered in the scene
-    std::vector<RenderedObject> _objects;
+    std::vector<object_t> _objects;
 
     std::vector<Light> _lights;
     glm::vec3 _ambientlight;
@@ -71,7 +74,6 @@ private:
     GLuint _glSceneAmbient;
 
     GLuint _glCameraPosition;
-	int _lastUpdate;
 };
 
 

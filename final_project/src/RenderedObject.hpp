@@ -4,68 +4,90 @@
 #include <memory>
 #include <vector>
 #include "glm/glm.hpp"
+#include "glm/gtc/matrix_inverse.hpp"
 #include "Mesh.hpp"
 #include "Material.hpp"
 #include "Texture.hpp"
 #include "BoundingBox.hpp"
 
+class RenderedObject;
+
+
+typedef std::shared_ptr<RenderedObject> object_t;
+// objectid_t is a unique identifier for any given object in the scene
+typedef size_t objectid_t;
+// this special objectid represents an uninitialized objectid
+const objectid_t INVALID_OBJECTID = std::numeric_limits<objectid_t>::max();
+
+
+
+
+
 // This is the base class for any object that is to
-// be rendered in the scene.  It knows how to render
-// itself
-
-
-class RenderedObject {
+// be rendered in the scene.  It knows how to render itself
+class RenderedObject
+{
 public:
-    RenderedObject(GLuint program, std::shared_ptr<Mesh> mesh, GLfloat speed);
+    RenderedObject(GLuint program,
+                   std::shared_ptr<Mesh> mesh,
+                   glm::vec3 position,
+                   glm::vec3 scale,
+                   glm::vec3 rotation);
 
-    // Rotate the object along the arbitrary axis, by 'theta' degrees
-    void rotate(glm::vec3 axis, double theta);
+    objectid_t getId()                  const { return _id;          }
+    std::shared_ptr<Mesh> getMesh()     const { return _mesh;        }
+    const BoundingBox &getBoundingBox() const { return _boundingbox; }
+    glm::mat4 getModelMatrix()          const { return _modelmatrix; }
+    glm::mat3 getInvTranspModelMatrix() const { return _modelinvtranspmatrix; }
+    glm::vec3 getPosition()             const { return _position;    }
+    glm::vec3 getRotation()             const { return _rotation;    }
+    glm::vec3 getScale()                const { return _scale;       }
+    bool      getVisible()              const { return _visible;     }
+    Material  getMaterial()             const { return _material;    }
+    Texture   getTexture()              const { return _texture;     }
 
-    // Move the object along the x, y, and z axes in the amount specified
-    void translate(glm::vec3 xyz);
+    // rotate/translate/scale the object
+    void rotate(glm::vec3 axis, float theta);
+    void translate(glm::vec3);
+    void scale(glm::vec3);
 
-    // Objects that are not 'visible' will not be rendered
-    void setVisible(bool visible);
-
-    // Set the matrix to convert from model coords to world coords
-    void setModelMatrix(glm::mat4 matrix);
-
-    // Set the material of the object
-    void setMaterial(const Material &m);
+    void setId(objectid_t id)             { _id = id;            }
+    void setModelMatrix(glm::mat4 matrix) { _modelmatrix = matrix;
+                                            _modelinvtranspmatrix = glm::inverseTranspose(glm::mat3(matrix)); }
+    void setMaterial(const Material &m)   { _material = m;       }
+    void setTexture (const Texture &t)    { _texture  = t;       }
+    void setVisible (bool visible)        { _visible  = visible; }
 
     // Render the object
     void render(GLuint modelmatrixid, GLuint modelinvtranspmatrixid);
 
-	// Update the object state, returns false if direction needs to change
-	bool update(int msDiff);
+	// Update the object state, returns false if direction needs to change (TODO: need to fix this)
+	virtual bool update(int elapsedms) = 0;
 
-	// notifies the object to change direction
-	void changeDirection();
+    // set a model matrix, or calculate it from _position, _scale, _rotation
+	void calculateModelMatrix();
 
-	BoundingBox bounds;
+    // Determine if this object's boundingbox intersects with the boundingbox of 'other'
+    bool intersects(const object_t &other);
 
-	// true if this intersects any object in the set
-	bool intersects(std::vector<RenderedObject>* set);
 
-	glm::mat4 getTransformationMatrix(bool includeRotation);
-
-    // Access the mesh data (probably should enforce const or something)
-    std::shared_ptr<Mesh> getMesh() { return _mesh; }
-
-private:
+protected:
     void storePoints();
     void storeNormals();
     void storeMesh();
     void storeTextureCoords();
 
-private:
+protected:
+    objectid_t _id;  // unique identifier given by the scene
     std::shared_ptr<Mesh> _mesh;
+	BoundingBox _boundingbox;
+
+private:
     glm::mat4 _modelmatrix;
     glm::mat3 _modelinvtranspmatrix;
 	glm::vec3 _position;
 	glm::vec3 _rotation;
-	GLfloat _speed;
-	GLint _direction; // probably just 0 or 1 but room for expansion
+    glm::vec3 _scale;
     bool _visible;
 
     GLuint _glvertexbuffer;

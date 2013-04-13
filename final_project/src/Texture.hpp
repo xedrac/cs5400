@@ -3,9 +3,10 @@
 
 #include <string>
 #include <vector>
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 
-class Texture {
+class Texture
+{
 public:
     Texture(const std::string &filename);     
     ~Texture();

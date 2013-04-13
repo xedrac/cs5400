@@ -1,6 +1,6 @@
 // Allows converting from glm::vec4 to glm::vec3 easily
 #include <GL/glew.h>
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #include "PlyParser.hpp"
 #include "Scene.hpp"
 #include "Program.hpp"
@@ -40,24 +40,46 @@ void Scene::init()
     _glCameraPosition     = glGetUniformLocation(handle, "camerapos_ws");
 
     _ambientlight = glm::vec3(0.2, 0.2, 0.2);
-
-	_lastUpdate = glutGet(GLUT_ELAPSED_TIME);
 }
 
 
-void Scene::loadObjectFromPly(const string &filename, int direction, glm::mat4 modelmatrix)
+// Returns a new unique id to represent an object in the scene
+objectid_t Scene::getNewObjectId()
 {
-    shared_ptr<Mesh> mesh = parsePlyFile(filename); 
-	glm::vec4 box = mesh->calcBounds();
-    RenderedObject obj(_program->getHandle(), mesh, 0.00005); // arbitrary speed for PLY object
-    obj.setModelMatrix(modelmatrix);
-	obj.translate(glm::vec3(0.0, -0.1, 0.0)); // adding this since I temporarily removed transformation based on setModelMatrix
-	if (direction > 0)
-		obj.changeDirection(); // adding this for collision demo
-	obj.bounds = BoundingBox(box);
-	obj.bounds.id = direction;
-    _objects.push_back(obj);
+    _objects.push_back(nullptr);
+    return _objects.size()-1;
 }
+
+// Adds an object with a given id to the scene
+void Scene::insertObject(object_t obj)
+{
+    if (obj->getId() >= _objects.size()) {
+        cerr << __FUNCTION__ << ": object id is invalid or out of range (did you first set obj->id with getNewObjectId()? )\n";
+        return;
+    } else if (_objects[obj->getId()] != nullptr) {
+        cerr << __FUNCTION__ << ": inserting object into non-NULL bin (this indicates a bug)\n";
+        return;
+    }
+
+    _objects[obj->getId()] = obj;
+}
+
+// Remove an object from the scene.  The object must have a valid objectid
+void Scene::removeObject(object_t obj)
+{
+    if (obj->getId() >= _objects.size()) {
+        cerr << __FUNCTION__ << ": object id is invalid or out of range\n";
+        return;
+    } else if (_objects[obj->getId()] == nullptr) {
+        cerr << __FUNCTION__ << ": object was already removed from the scene\n";
+        return;
+    }
+
+    _objects[obj->getId()] = nullptr;
+}
+
+
+
 
 
 void Scene::addLight(const Light &light)
@@ -126,54 +148,7 @@ void Scene::render(const glm::vec3 &eyeposition,
 
     // now render each object
     for (size_t i=0; i<_objects.size(); i++) {
-        _objects[i].render(_glModelMatrix, _glModelInvTranspMatrix);
+        if (_objects[i] != nullptr)
+            _objects[i]->render(_glModelMatrix, _glModelInvTranspMatrix);
     }
 }
-
-// update state of all objects
-void Scene::updateObjectState() 
-{
-	// get elapsed ms since last update
-	int msDiff = glutGet(GLUT_ELAPSED_TIME) - _lastUpdate;
-
-	bool keepDirection = true;
-	// update all objects' state
-	for (size_t i=0; i<_objects.size(); i++) {
-        keepDirection = _objects[i].update(msDiff);
-		if (!keepDirection)
-		{
-			// need to change direction of all objects in the scene
-			for (size_t j=0; j<_objects.size(); j++) {
-				_objects[j].changeDirection();
-			}
-			keepDirection = true;
-		}
-    }
-
-	// check for collisions
-	// NOTE: As we progress, we should only check objects that can intersect (e.g. enemy projectiles and player) but for demo we'll check everything
-	bool collision = false;
-	for (size_t i=0; i<_objects.size(); i++) {
-		if (_objects[i].intersects(&_objects))
-		{
-			collision = true;
-			break;
-		}
-	}
-	
-	// for demo, if we have a collision we'll change light to red, otherwise the green
-	if (collision)
-		_lights[0].setDiffuse(glm::vec3(1.0, 0.2, 0.2));
-	else
-		_lights[0].setDiffuse(glm::vec3(0.9, 1.0, 0.8));
-
-	// set new last update time
-	_lastUpdate = glutGet(GLUT_ELAPSED_TIME);
-} 
-
-// refreshes time before starting a scene render after models have been loaded
-void Scene::refreshTime()
-{
-	_lastUpdate = glutGet(GLUT_ELAPSED_TIME);
-}
-

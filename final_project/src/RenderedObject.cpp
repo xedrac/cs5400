@@ -9,14 +9,18 @@
 using namespace std;
 
 
-RenderedObject::RenderedObject(GLuint program, std::shared_ptr<Mesh> mesh, GLfloat speed)
-    : _mesh(mesh),
-	  _position(glm::vec3(0.0, 0.0, 0.0)),
-	  _rotation(glm::vec3(0.0, 0.0, 0.0)),
-	  _speed(speed),
-	  _direction(0),  // might want to be able to pass this in, but for now we'll default to one direction
+RenderedObject::RenderedObject(GLuint program,
+                               std::shared_ptr<Mesh> mesh,
+                               glm::vec3 position,
+                               glm::vec3 scale,
+                               glm::vec3 rotation)
+    : _id(INVALID_OBJECTID),
+      _mesh(mesh),
+	  _position(position),
+	  _rotation(rotation),
+      _scale(scale),
       _visible(true),
-      _texture("../textures/mycheckered_darkest.png")
+      _texture("../textures/mycheckered_darkest.png") // TODO: remove this in the future
 {
     setModelMatrix(glm::mat4(1.0));
 
@@ -111,19 +115,13 @@ void RenderedObject::storeMesh()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, triangles.size()*3*sizeof(GLuint), triangles.data(), GL_STATIC_DRAW);
 }
 
-
 // Rotate the object along the arbitrary axis, by 'theta' degrees
-void RenderedObject::rotate(glm::vec3 axis, double theta)
+void RenderedObject::rotate(glm::vec3 axis, float theta)
 {
-    if (axis.x > 0) {
-		_rotation.x += theta;
-	}
-	if (axis.y > 0) {
-		_rotation.y += theta;
-	}
-	if (axis.z > 0) {
-		_rotation.z += theta;
-	}
+    if (axis.x > 0) { _rotation.x += theta; }
+	if (axis.y > 0) { _rotation.y += theta; }
+	if (axis.z > 0) { _rotation.z += theta; }
+    calculateModelMatrix();
 }
 
 
@@ -131,28 +129,20 @@ void RenderedObject::rotate(glm::vec3 axis, double theta)
 void RenderedObject::translate(glm::vec3 xyz)
 {
 	_position += xyz;
+    calculateModelMatrix();
 }
 
 
-// Objects that are not 'visible' will not be rendered
-void RenderedObject::setVisible(bool visible)
+void RenderedObject::scale(glm::vec3 scalevec)
 {
-    _visible = visible;
+    _scale = scalevec; 
+    calculateModelMatrix();
 }
 
 
-// Set the matrix to convert from model coords to world coords
-void RenderedObject::setModelMatrix(glm::mat4 matrix)
+bool RenderedObject::intersects(const object_t &other)
 {
-    _modelmatrix = matrix; 
-    _modelinvtranspmatrix = glm::inverseTranspose(glm::mat3(matrix));
-}
-
-
-// Set the material of the object
-void RenderedObject::setMaterial(const Material &m)
-{
-    _material = m; 
+    return getBoundingBox().intersects(other->getBoundingBox());
 }
 
 
@@ -165,13 +155,8 @@ void RenderedObject::render(GLuint modelmatrixid, GLuint modelinvtranspmatrixid)
 
     _texture.bindTexture();
 
-	glm::mat4 transformMatrix = getTransformationMatrix(true);
-
-	// below line should reference _modelmatrix after gamestate refactor
-    glUniformMatrix4fv(modelmatrixid, 1, GL_FALSE, glm::value_ptr(transformMatrix));
-	glm::mat3 invModel = glm::inverseTranspose(glm::mat3(transformMatrix));
-	// below line should reference _modelinvtranspmatrix after gamestate refactor
-    glUniformMatrix3fv(modelinvtranspmatrixid, 1, GL_FALSE, glm::value_ptr(invModel));
+    glUniformMatrix4fv(modelmatrixid, 1, GL_FALSE, glm::value_ptr(_modelmatrix));
+    glUniformMatrix3fv(modelinvtranspmatrixid, 1, GL_FALSE, glm::value_ptr(_modelinvtranspmatrix));
 
     glEnableVertexAttribArray(_glvertexattrib);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glmeshbuffer);
@@ -207,63 +192,18 @@ void RenderedObject::render(GLuint modelmatrixid, GLuint modelinvtranspmatrixid)
     glUniform4f(_glspecular, specular.r, specular.g, specular.b, ambient.w);
 }
 
-// Update the object's state. Returns false if direction needs to change
-bool RenderedObject::update(int msDiff)
+
+void RenderedObject::calculateModelMatrix()
 {
-	// first update this object's bounding box
-	glm::mat4 matrix = getTransformationMatrix(false);
-	bounds.update(matrix);
+    glm::mat4 matrix = glm::mat4(1.0);
 
-	if (_direction == 0)
-	{
-		//this->rotate(glm::vec3(0.0, 1.0, 0.0), this->_speed * 500 * msDiff);
-		this->translate(glm::vec3(_speed * msDiff, 0.0, 0.0));
-		//return !(this->_position.x > 0.11);
-		return !(this->_position.x > 0.15); // make it bigger to show off collision
-	}
-	else
-	{
-		//this->rotate(glm::vec3(0.0, 1.0, 0.0), this->_speed * -500 * msDiff);
-		this->translate(glm::vec3(-_speed * msDiff, 0.0, 0.0));
-		//return !(this->_position.x < -0.09);
-		return !(this->_position.x < -0.13); // make it bigger to show off collision
-	}
+    matrix = glm::translate(matrix, _position);
+    matrix = glm::scale    (matrix, _scale);
+    matrix = glm::rotate   (matrix, _rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+    matrix = glm::rotate   (matrix, _rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+    matrix = glm::rotate   (matrix, _rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
 
-	// rules to change direction -- earlier discussion was if invisible bounding walls were hit
-	// moved up into above logic branch to prevent sticky boundary problem
-	//return !(this->_position.x > 0.11) && !(this->_position.x < -0.09);
+    _modelmatrix = matrix;
+    _modelinvtranspmatrix = glm::inverseTranspose(glm::mat3(matrix));
 }
 
-// Change the object's direction
-void RenderedObject::changeDirection()
-{
-	// simple 0 <-> 1 for now
-	_direction = _direction ^ 1;
-}
-
-
-// Naive implementation
-bool RenderedObject::intersects(std::vector<RenderedObject>* set)
-{
-	for(size_t i = 0; i < set->size(); i++) {
-		if (bounds.intersects(&set->at(i).bounds))
-			return true;
-	}
-	return false;
-}
-
-glm::mat4 RenderedObject::getTransformationMatrix(bool includeRotation)
-{
-	glm::mat4 modelTranslate = glm::translate(glm::mat4(1.0), _position);
-	if (includeRotation)
-	{
-		glm::mat4 modelRotateX = glm::rotate(modelTranslate, _rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-		glm::mat4 modelRotateY = glm::rotate(modelRotateX, _rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-		glm::mat4 model = glm::rotate(modelRotateY, _rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-		return model;
-	}
-	else
-	{
-		return modelTranslate;
-	}
-}

@@ -2,11 +2,15 @@ cmake_minimum_required(VERSION 2.6)
 
 project(render)
 
+#set (CMAKE_PREFIX_PATH /usr/lib/x86_64-linux-gnu/)
+
 find_package(GLEW REQUIRED)
 find_package(GLUT REQUIRED)
 find_package(OpenGL REQUIRED)
 
 set(CMAKE_CXX_FLAGS  "-g --std=c++0x -Wall")
+
+include(clang.cmake)
 
 include_directories(
     ${GLUT_INCLUDE_DIR}
@@ -15,11 +19,12 @@ include_directories(
     src
     externals)
 
-#link_directories()
+#link_directories(/usr/lib/x86-64/-linux-gnu/)
 
 add_executable(render
     src/main.cpp
     src/Program.cpp
+    src/BoundingBox.cpp
     src/Shader.cpp
     src/Util.cpp
     src/Mesh.cpp
@@ -28,8 +33,11 @@ add_executable(render
     src/RenderedObject.cpp
     src/PlyParser.cpp
     src/Texture.cpp
+    src/GameState.cpp
+    src/Spaceship.cpp
     externals/parsers/ply/ply.c
 )
+
 
 target_link_libraries(render
     ${GLUT_LIBRARIES}

@@ -11,7 +11,7 @@ public:
     BoundingBox(glm::vec4 bounds);
 
 	// true if this intersects another box
-	bool intersects(BoundingBox* other);
+	bool intersects(const BoundingBox &other) const;
 
 	int id;
 

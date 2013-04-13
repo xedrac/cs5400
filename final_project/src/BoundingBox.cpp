@@ -14,15 +14,13 @@ BoundingBox::BoundingBox(glm::vec4 bounds)
 
 // Naive implementation of box intersection
 // Checks four scenarios where boxes cannot intersect 
-bool BoundingBox::intersects(BoundingBox* other)
+bool BoundingBox::intersects(const BoundingBox &other) const
 {
-	if (id == other->id)
+	if (id == other.id)
 		return false;
 
-	return !((this->_bounds.x > other->_bounds.y ||
-			  this->_bounds.y < other->_bounds.x) ||
-			 (this->_bounds.z > other->_bounds.w ||
-			  this->_bounds.w < other->_bounds.z));
+	return !((_bounds.x > other._bounds.y || _bounds.y < other._bounds.x) ||
+			 (_bounds.z > other._bounds.w || _bounds.w < other._bounds.z));
 }
 
 void BoundingBox::setPoints()
