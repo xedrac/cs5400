@@ -35,15 +35,20 @@ void GameState::init()
     float enemyscale = 0.55;
     loadEnemyShips(bunnymesh, enemyrows, enemycols, enemyspeed, enemyscale);
 
-    _playership = make_shared<Spaceship>(_program->getHandle(),
-                                         bunnymesh,
-                                         glm::vec3(0.0f, -0.7f, 0.0f ), // position
-                                         glm::vec3(0.4f,  0.4f, 0.4f),  // scale
-                                         glm::vec3(0.0f,  0.0f, 0.0f ), // rotation
-                                         -1,                            // direction
-                                         0.0001);                       // speed
+    _playership = make_shared<Spaceship>(Spaceship(_program->getHandle(),
+                                                   bunnymesh,
+                                                   glm::vec3(0.0f, -0.7f, 0.0f ), // position
+                                                   glm::vec3(0.4f,  0.4f, 0.4f),  // scale
+                                                   glm::vec3(0.0f,  0.0f, 0.0f ), // rotation
+                                                   -1,                            // direction
+                                                   0.0001));                      // speed
     _playership->setId(_scene.getNewObjectId());
     _scene.insertObject(_playership);
+
+    // test particle system
+    std::shared_ptr<ParticleSystem> ps = make_shared<ParticleSystem>(ParticleSystem(10));
+    _particlesystems.push_back(ps);
+    _scene.insertParticleSystem(ps);
 
     refreshTime();
 
@@ -209,13 +214,13 @@ void GameState::loadEnemyShips(shared_ptr<Mesh> mesh, int enemyrows, int enemyco
         for (int col=0; col<enemycols; col++) {
             float xpos = col*xgap - halfwidth;
             //float xpos = (col - halfcols) * 0.1;
-            enemy = make_shared<Spaceship>(_program->getHandle(),
-                                           mesh,
-                                           glm::vec3(xpos, ypos, 0.0f), // position
-                                           glm::vec3(scale),            // scale
-                                           glm::vec3(0.0f, 0.0f, 0.0f), // rotation
-                                           1,                           // direction
-                                           speed);                      // speed
+            enemy = make_shared<Spaceship>(Spaceship(_program->getHandle(),
+                                                     mesh,
+                                                     glm::vec3(xpos, ypos, 0.0f), // position
+                                                     glm::vec3(scale),            // scale
+                                                     glm::vec3(0.0f, 0.0f, 0.0f), // rotation
+                                                     1,                           // direction
+                                                     speed));                     // speed
             addEnemy(enemy);
 
 
