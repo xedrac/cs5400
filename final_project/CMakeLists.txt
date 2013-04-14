@@ -36,6 +36,8 @@ add_executable(render
     src/Texture.cpp
     src/GameState.cpp
     src/Spaceship.cpp
+    src/Particle.cpp
+    src/ParticleSystem.cpp
     externals/parsers/ply/ply.c
 )
 
