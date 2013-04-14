@@ -7,7 +7,7 @@
 #include "glm/glm.hpp"
 #include "BoundingBox.hpp"
 
-struct Triangle;
+struct Face;
 
 
 class Mesh
@@ -18,20 +18,21 @@ public:
 
     std::vector<glm::vec3> vertices;
     std::vector<glm::vec3> normals;
+    std::vector<glm::vec2> uvcoords;
 
-    // vertex indicies that make up the triangles of this mesh
-    // (0,1,2), (3,4,5) ...  are indexes for triangles
-    std::vector<Triangle> triangles;
+    // vertex indicies that make up the faces of this mesh
+    // (0,1,2), (3,4,5) ...  are indexes for faces
+    std::vector<Face> faces;
 
     const BoundingBox &getBoundingBox() { return _boundingbox; }
 
 private:
-    std::vector<glm::vec3> calcTriangleNormals(std::vector<std::vector<size_t> > &vertexToTrianglesMap);
+    std::vector<glm::vec3> calcFaceNormals(std::vector<std::vector<size_t> > &vertexToFacesMap);
     glm::vec3 calcNormalMWASEL(const std::vector<size_t> &tvec, const std::vector<glm::vec3> &tN);
     glm::vec3 calcNormalMWA(size_t vindex, const std::vector<size_t> &tvec, const std::vector<glm::vec3> &tN);
     glm::vec3 calcNormalMWE(const std::vector<size_t> &tvec, const std::vector<glm::vec3> &tN);
     glm::vec3 calcNormalMWSA(const std::vector<size_t> &tvec, const std::vector<glm::vec3> &tN);
-    float calcAreaOfTriangle(const Triangle &t);
+    float calcAreaOfFace(const Face &t);
 
 private:
     BoundingBox _boundingbox;
@@ -42,9 +43,9 @@ private:
 
 
 
-struct Triangle
+struct Face
 {
-    Triangle(GLuint aa, GLuint bb, GLuint cc)
+    Face(GLuint aa, GLuint bb, GLuint cc)
         : a(aa), b(bb), c(cc)
     {
     }

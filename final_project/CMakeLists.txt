@@ -32,6 +32,7 @@ add_executable(render
     src/Camera.cpp
     src/RenderedObject.cpp
     src/PlyParser.cpp
+    src/ObjParser.cpp
     src/Texture.cpp
     src/GameState.cpp
     src/Spaceship.cpp

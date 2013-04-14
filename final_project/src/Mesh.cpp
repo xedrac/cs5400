@@ -6,30 +6,30 @@
 using namespace std;
 
 
-// Calculate the triangle normals for this mesh
-vector<glm::vec3> Mesh::calcTriangleNormals(vector<vector<size_t> > &vertexToTrianglesMap)
+// Calculate the face normals for this mesh
+vector<glm::vec3> Mesh::calcFaceNormals(vector<vector<size_t> > &vertexToFacesMap)
 {
-    // keep track of which triangles a given vertex is part of
-    vertexToTrianglesMap.resize(vertices.size());
+    // keep track of which faces a given vertex is part of
+    vertexToFacesMap.resize(vertices.size());
 
-    // calculate triangle normals
+    // calculate face normals
     vector<glm::vec3> tNormals;
-    for (size_t i=0; i<triangles.size(); i++) {
-        const Triangle &t = triangles[i];
+    for (size_t i=0; i<faces.size(); i++) {
+        const Face &t = faces[i];
         const glm::vec3 &a = vertices[t.a];
         const glm::vec3 &b = vertices[t.b];
         const glm::vec3 &c = vertices[t.c];
         tNormals.push_back(glm::cross(b-a, c-a));
 
-        vertexToTrianglesMap[t.a].push_back(i);
-        vertexToTrianglesMap[t.b].push_back(i);
-        vertexToTrianglesMap[t.c].push_back(i);
+        vertexToFacesMap[t.a].push_back(i);
+        vertexToFacesMap[t.b].push_back(i);
+        vertexToFacesMap[t.c].push_back(i);
     }
 
     return tNormals;
 }
 
-float Mesh::calcAreaOfTriangle(const Triangle &t)
+float Mesh::calcAreaOfFace(const Face &t)
 {
     const glm::vec3 &p1 = vertices[t.a];
     const glm::vec3 &p2 = vertices[t.b];
@@ -50,8 +50,8 @@ glm::vec3 Mesh::calcNormalMWSA(const std::vector<size_t> &tvec, const std::vecto
 
     for (size_t i=0; i<tvec.size(); i++) {
         const size_t tindex = tvec[i];
-        const Triangle &t = triangles[tindex];
-        float area = calcAreaOfTriangle(t);
+        const Face &t = faces[tindex];
+        float area = calcAreaOfFace(t);
         normal += tN[tindex]*area;
     }
 
@@ -61,7 +61,7 @@ glm::vec3 Mesh::calcNormalMWSA(const std::vector<size_t> &tvec, const std::vecto
 void Mesh::calcNormalsMWSA()
 {
     vector<vector<size_t>> vtmap;
-    vector<glm::vec3> tN = calcTriangleNormals(vtmap);
+    vector<glm::vec3> tN = calcFaceNormals(vtmap);
     normals.clear();
 
     for (size_t i=0; i<vertices.size(); i++) {

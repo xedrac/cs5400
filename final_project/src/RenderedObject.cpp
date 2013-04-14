@@ -112,9 +112,9 @@ void RenderedObject::storeNormals()
 // Store the mesh in a GPU buffer
 void RenderedObject::storeMesh()
 {
-    const vector<Triangle> &triangles = _mesh->triangles;
+    const vector<Face> &faces = _mesh->faces;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glmeshbuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, triangles.size()*3*sizeof(GLuint), triangles.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, faces.size()*3*sizeof(GLuint), faces.data(), GL_STATIC_DRAW);
 }
 
 // Rotate the object along the arbitrary axis, by 'theta' degrees
@@ -177,7 +177,7 @@ void RenderedObject::render(GLuint modelmatrixid, GLuint modelinvtranspmatrixid)
     glBindTexture(GL_TEXTURE_2D, _texture.textureId());
     glUniform1i(_gltexturesampler, 0);
 
-    glDrawElements(GL_TRIANGLES, _mesh->triangles.size()*3, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, _mesh->faces.size()*3, GL_UNSIGNED_INT, 0);
 
     glDisableVertexAttribArray(_glvertexattrib);
     glDisableVertexAttribArray(_glnormalattrib);

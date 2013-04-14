@@ -11,7 +11,7 @@ using namespace std;
 
 shared_ptr<Mesh> parsePlyFile(const string &filename)
 {
-    struct Face {
+    struct PlyFace {
         unsigned char nvertex;
         int *vertex;
     };
@@ -25,7 +25,7 @@ shared_ptr<Mesh> parsePlyFile(const string &filename)
 
     // list of property information for a face
     PlyProperty face_props[] = {  
-        {(char *)"vertex_indices", PLY_INT, PLY_INT, offsetof(Face,vertex), 1, PLY_UCHAR, PLY_UCHAR, offsetof(Face,nvertex)},
+        {(char *)"vertex_indices", PLY_INT, PLY_INT, offsetof(PlyFace,vertex), 1, PLY_UCHAR, PLY_UCHAR, offsetof(PlyFace,nvertex)},
     };
 
     int filetype;
@@ -76,10 +76,10 @@ shared_ptr<Mesh> parsePlyFile(const string &filename)
         if (!strncmp(name, "face", 4)) {
             ply_get_property(ply, name, &face_props[0]);
 
-            Face face;
+            PlyFace plyface;
             for (int j=0; j<nelem; j++) {
-                ply_get_element(ply, (void *)&face);
-                mesh->triangles.push_back(Triangle(face.vertex[0], face.vertex[1], face.vertex[2]));
+                ply_get_element(ply, (void *)&plyface);
+                mesh->faces.push_back(Face(plyface.vertex[0], plyface.vertex[1], plyface.vertex[2]));
             }
         }
     }

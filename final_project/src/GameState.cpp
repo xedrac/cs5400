@@ -197,7 +197,7 @@ void GameState::loadEnemyShips(shared_ptr<Mesh> mesh, int enemyrows, int enemyco
     if (enemyrows > 10) enemyrows = 10;
 
     // half of the columns minus the center column
-    int halfcols = (int)(enemycols / 2);
+    //int halfcols = (int)(enemycols / 2);
     int halfrows = (int)(enemyrows / 2);
 
     float screenwidth = 1.8;  // (-1.0, 1.0)
