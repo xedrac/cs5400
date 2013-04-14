@@ -43,6 +43,7 @@ private:
     std::shared_ptr<cs5400::Program> _program;
     std::vector<std::shared_ptr<Spaceship>> _enemyships;
     std::shared_ptr<Spaceship> _playership;
+    std::vector< std::shared_ptr<ParticleSystem> > _particlesystems;
 
 	int _lastupdate;
     bool _running;

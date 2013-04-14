@@ -8,6 +8,7 @@
 #include "Program.hpp"
 #include "Light.hpp"
 #include "RenderedObject.hpp"
+#include "ParticleSystem.hpp"
 #include <vector>
 
 
@@ -38,6 +39,8 @@ public:
     void insertObject(object_t obj);
     void removeObject(object_t obj);
 
+    void insertParticleSystem(std::shared_ptr<ParticleSystem> ps);
+
     // render all of the objects in the scene
     void render(const glm::vec3 &eyeposition,
                 const glm::vec3 &lookdirection,
@@ -52,6 +55,7 @@ private:
     
     // All objects to be rendered in the scene
     std::vector<object_t> _objects;
+    std::vector< std::shared_ptr<ParticleSystem> > _particlesystems;
 
     std::vector<Light> _lights;
     glm::vec3 _ambientlight;

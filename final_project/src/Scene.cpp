@@ -78,9 +78,10 @@ void Scene::removeObject(object_t obj)
     _objects[obj->getId()] = nullptr;
 }
 
-
-
-
+void Scene::insertParticleSystem(std::shared_ptr<ParticleSystem> ps)
+{
+    _particlesystems.push_back(ps);
+}
 
 void Scene::addLight(const Light &light)
 {
@@ -150,5 +151,11 @@ void Scene::render(const glm::vec3 &eyeposition,
     for (size_t i=0; i<_objects.size(); i++) {
         if (_objects[i] != nullptr)
             _objects[i]->render(_glModelMatrix, _glModelInvTranspMatrix);
+    }
+
+    // now render each particle system
+    for (size_t i=0; i<_particlesystems.size(); i++) {
+        if (_particlesystems[i] != nullptr)
+            _particlesystems[i]->render();
     }
 }
