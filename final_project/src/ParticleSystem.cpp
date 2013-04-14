@@ -39,5 +39,4 @@ void ParticleSystem::render()
     glBufferSubData(GL_ARRAY_BUFFER, 0, _size * sizeof(glm::vec4), &points[0]);
     glBufferSubData(GL_ARRAY_BUFFER, _size * sizeof(glm::vec4), _size * sizeof(glm::vec4), &colors[0]);
     glDrawArrays(GL_POINTS, 0, _size);
-    glutSwapBuffers();
 }
