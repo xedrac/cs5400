@@ -10,7 +10,7 @@ find_package(OpenGL REQUIRED)
 
 set(CMAKE_CXX_FLAGS  "-g --std=c++0x -Wall")
 
-include(clang.cmake)
+#include(clang.cmake)
 
 include_directories(
     ${GLUT_INCLUDE_DIR}
@@ -38,6 +38,7 @@ add_executable(render
     src/Spaceship.cpp
     src/Particle.cpp
     src/ParticleSystem.cpp
+    src/Projectile.cpp
     externals/parsers/ply/ply.c
 )
 

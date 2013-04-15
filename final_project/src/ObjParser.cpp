@@ -68,9 +68,9 @@ shared_ptr<Mesh> ObjParser::parse(const string &filename)
 
         } else if (key == "f ") {
             istringstream s(line.substr(2));
-            GLuint v1, vt1, vn1;
-            GLuint v2, vt2, vn2;
-            GLuint v3, vt3, vn3;
+            GLuint v1=0, vt1=0, vn1=0;
+            GLuint v2=0, vt2=0, vn2=0;
+            GLuint v3=0, vt3=0, vn3=0;
     
             char c;
             s >> v1;  s.get(c);
@@ -157,5 +157,6 @@ shared_ptr<Mesh> ObjParser::parse(const string &filename)
         mesh->uvcoords.push_back(uvcoords[uvindex]);
     }
 
+    mesh->calcBoundingBox();
     return mesh;
 }

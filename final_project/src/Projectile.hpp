@@ -1,6 +1,7 @@
 #ifndef PROJECTILE_HPP
 #define PROJECTILE_HPP
 
+#include <memory>
 #include "glm/glm.hpp"
 #include "RenderedObject.hpp"
 #include "Mesh.hpp"
@@ -9,13 +10,20 @@
 class Projectile : public RenderedObject
 {
 public:
-    Projectile(glm::vec3 direction, float speed);
+    Projectile(GLuint program,
+               std::shared_ptr<Mesh> mesh,
+               glm::vec3 position,
+               glm::vec3 scale,
+               glm::vec3 rotation,
+               glm::vec3 direction,
+               float speed);
+    virtual ~Projectile() {}
+
+    virtual bool update(int elapsedms);
 
 private:
-	glm::vec3 _position;
-	glm::vec3 _rotation;
-	float     _speed;
-	int       _direction; // probably just 0 or 1 but room for expansion
+	glm::vec3 _direction;
+	float _speed;
 };
 
 

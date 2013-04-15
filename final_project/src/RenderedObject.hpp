@@ -34,6 +34,8 @@ public:
                    glm::vec3 scale,
                    glm::vec3 rotation);
 
+    virtual ~RenderedObject() {}
+
     objectid_t getId()                  const { return _id;          }
     std::shared_ptr<Mesh> getMesh()     const { return _mesh;        }
     const BoundingBox &getBoundingBox() const { return _boundingbox; }

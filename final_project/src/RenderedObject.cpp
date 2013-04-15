@@ -16,6 +16,7 @@ RenderedObject::RenderedObject(GLuint program,
                                glm::vec3 rotation)
     : _id(INVALID_OBJECTID),
       _mesh(mesh),
+      _boundingbox(mesh->getBoundingBox()),
 	  _position(position),
 	  _rotation(rotation),
       _scale(scale),
@@ -144,7 +145,7 @@ void RenderedObject::scale(glm::vec3 scalevec)
 
 bool RenderedObject::intersects(const object_t &other)
 {
-    return getBoundingBox().intersects(other->getBoundingBox());
+    return _boundingbox.intersects(other->getBoundingBox());
 }
 
 

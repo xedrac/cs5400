@@ -33,6 +33,7 @@ void Camera::reset()
     _nearfieldclip = 0.01; // clip anything closer than this
     _farfieldclip  = 10.0; // clip anything farther than this
     _projection    = glm::perspective(_fieldofview, _aspectratio, _nearfieldclip, _farfieldclip);
+    //_projection    = glm::ortho(-1.2f, 1.2f, -0.75f, 0.75f, _nearfieldclip, _farfieldclip);
 }
 
 

@@ -7,8 +7,10 @@
 using namespace std;
 
 // Hack for GLUT callbacks to call C++ member functions
-void onKey(unsigned char key, int x, int y) { GameState::getInstance().onKey(key, x, y);        }
-void onSpecialKey(int key, int x, int y)    { GameState::getInstance().onSpecialKey(key, x, y); }
+void onKey(unsigned char key, int x, int y)         { GameState::getInstance().onKey(key, x, y);             }
+void onKeyRelease(unsigned char key, int x, int y)  { GameState::getInstance().onKeyRelease(key, x, y);      }
+void onSpecialKey(int key, int x, int y)            { GameState::getInstance().onSpecialKey(key, x, y);      }
+void onMouseButton(int btn, int state, int x, int y){ GameState::getInstance().onMouseButton(btn, state, x, y); }
 
 
  
@@ -32,7 +34,10 @@ int main(int argc, char **argv)
         // Because GLUT is C (not c++), and we want the callbacks to be members of the
         // GameState class, we have to use thunks in order to hack it into submission
         glutKeyboardFunc(onKey);
+        glutKeyboardUpFunc(onKeyRelease);
         glutSpecialFunc(onSpecialKey);
+        glutMouseFunc(onMouseButton);
+        glutIgnoreKeyRepeat(1);
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);

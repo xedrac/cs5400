@@ -1,6 +1,7 @@
 
 #include <list>
 #include <cmath>
+#include <iostream>
 #include "Mesh.hpp"
 
 using namespace std;
@@ -70,6 +71,7 @@ void Mesh::calcNormalsMWSA()
     }
 }
 
+#if 0
 // Naive method to calculate xy square around object
 void Mesh::calcBoundingBox()
 {
@@ -89,4 +91,32 @@ void Mesh::calcBoundingBox()
     }
 
     _boundingbox = BoundingBox(result);
+}
+#endif
+
+
+// Find the box surronding the mesh (in model space)
+void Mesh::calcBoundingBox()
+{
+    Box3D box = Box3D();
+
+    cout << "Model BoundingBox: ";    
+
+    for (size_t i=0; i<vertices.size(); i++) {
+        const glm::vec3 &v = vertices[i];           
+        if      (v.x < box.x0) box.x0 = v.x;
+        else if (v.x > box.x1) box.x1 = v.x;
+
+        if      (v.y < box.y0) box.y0 = v.y;
+        else if (v.y > box.y1) box.y1 = v.y;
+
+        if      (v.z < box.z0) box.z0 = v.z;
+        else if (v.z > box.z1) box.z1 = v.z;
+    }
+
+    cout << "(" << box.x0 << "," << box.x1 << ") "
+         << "(" << box.y0 << "," << box.y1 << ") "
+         << "(" << box.z0 << "," << box.z1 << ")\n";
+
+    _boundingbox = BoundingBox(box);
 }

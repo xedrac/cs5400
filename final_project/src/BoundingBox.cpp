@@ -1,64 +1,78 @@
+
 #include "BoundingBox.hpp"
+
+using namespace std;
 
 BoundingBox::BoundingBox()
 {
-	_bounds = glm::vec4(0.0);
-	setPoints();
+    setPoints();
 }
 
-BoundingBox::BoundingBox(glm::vec4 bounds)
+BoundingBox::BoundingBox(const Box3D &box)
 {
-	_bounds = bounds;
-	setPoints();
+    _box = box;
+    setPoints();
 }
 
-// Naive implementation of box intersection
-// Checks four scenarios where boxes cannot intersect 
+
+// Checks to see if two BoundingBoxes overlap.  Assumes axis-aligned edges
 bool BoundingBox::intersects(const BoundingBox &other) const
 {
-	if (id == other.id)
-		return false;
+    return !((_box.x0 > other.getBox().x1 || _box.x1 < other.getBox().x0) ||
+             (_box.y0 > other.getBox().y1 || _box.y1 < other.getBox().y0) ||
+             (_box.z0 > other.getBox().z1 || _box.z1 < other.getBox().z0));
+}
 
-	return !((_bounds.x > other._bounds.y || _bounds.y < other._bounds.x) ||
-			 (_bounds.z > other._bounds.w || _bounds.w < other._bounds.z));
+void BoundingBox::setBox(const Box3D &box)
+{
+    _box = box;
+    setPoints();
 }
 
 void BoundingBox::setPoints()
 {
-	points = std::vector<glm::vec4>();
-	points.push_back(glm::vec4(_bounds.x, _bounds.z, 0.0, 1.0));
-	points.push_back(glm::vec4(_bounds.y, _bounds.z, 0.0, 1.0));
-	points.push_back(glm::vec4(_bounds.x, _bounds.w, 0.0, 1.0));
-	points.push_back(glm::vec4(_bounds.y, _bounds.w, 0.0, 1.0));
-	_xformedPoints = std::vector<glm::vec4>();
-	_xformedPoints.resize(4);
+	_points.clear();
+
+	_points.push_back(glm::vec4(_box.x0, _box.y0, _box.z0, 1.0));
+	_points.push_back(glm::vec4(_box.x0, _box.y1, _box.z0, 1.0));
+	_points.push_back(glm::vec4(_box.x1, _box.y1, _box.z0, 1.0));
+	_points.push_back(glm::vec4(_box.x1, _box.y0, _box.z0, 1.0));
+
+	_points.push_back(glm::vec4(_box.x0, _box.y0, _box.z1, 1.0));
+	_points.push_back(glm::vec4(_box.x0, _box.y1, _box.z1, 1.0));
+	_points.push_back(glm::vec4(_box.x1, _box.y1, _box.z1, 1.0));
+	_points.push_back(glm::vec4(_box.x1, _box.y0, _box.z1, 1.0));
+
+	_xformedpoints.resize(_points.size());
 }
+
 
 // Naive method to calculate xy square around object
 void BoundingBox::calcBounds()
 {
-	// x_min, x_max, y_min, y_max
-	glm::vec4 result = glm::vec4(1000, -1000, 1000, -1000);
-	glm::vec4* item;
-	for (size_t i=0; i<_xformedPoints.size(); i++) {
-		item = &_xformedPoints[i];
-		if (item->x < result.x)
-			result.x = item->x;
-		else if (item-> x > result.y)
-			result.y = item->x;
-		if (item->y < result.z)
-			result.z = item->y;
-		else if (item->y > result.w)
-			result.w = item->y;
+    // Clear the box
+    _xbox = Box3D();
+    
+	for (size_t i=0; i<_xformedpoints.size(); i++) {
+        const glm::vec4 &p = _xformedpoints[i];
+
+		if      (p.x < _xbox.x0) _xbox.x0 = p.x;
+		else if (p.x > _xbox.x1) _xbox.x1 = p.x;
+
+		if      (p.y < _xbox.y0) _xbox.y0 = p.y;
+		else if (p.y > _xbox.y1) _xbox.y1 = p.y;
+
+		if      (p.z < _xbox.z0) _xbox.z0 = p.z;
+		else if (p.z > _xbox.z1) _xbox.z1 = p.z;
     }
-	_bounds = result;
 }
+
 
 void BoundingBox::update(glm::mat4 matrix)
 {
-	for (size_t i = 0; i < points.size(); i++)
-	{
-		_xformedPoints[i] = glm::mat4(matrix) * points[i];
+	for (size_t i=0; i<_points.size(); i++) {
+		_xformedpoints[i] = matrix * _points[i];
 	}
+
 	calcBounds();
 }

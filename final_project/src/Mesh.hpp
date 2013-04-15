@@ -7,6 +7,7 @@
 #include "glm/glm.hpp"
 #include "BoundingBox.hpp"
 
+class Mesh;
 struct Face;
 
 
