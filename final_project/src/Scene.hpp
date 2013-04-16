@@ -48,7 +48,8 @@ public:
                 const glm::mat4 &projectionmatrix);
 
 
-    std::shared_ptr<cs5400::Program> getProgram() { return _program; }
+    std::shared_ptr<cs5400::Program> getProgram()          { return _program;          }
+    std::shared_ptr<cs5400::Program> getProgramParticles() { return _programParticles; }
 
 private:
     std::shared_ptr<cs5400::Program> _program;

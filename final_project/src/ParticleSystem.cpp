@@ -50,7 +50,7 @@ void ParticleSystem::render(GLuint modelmatrixid,
     std::vector<glm::vec4> points;
     std::vector<glm::vec4> colors;
 
-    for (size_t i = 0; i < _size; i++)
+    for (int i = 0; i < _size; i++)
     {
         points.push_back(glm::vec4(_particles[i].getPosition(), 1.0));
         colors.push_back(_particles[i].getColor());
@@ -74,6 +74,9 @@ void ParticleSystem::render(GLuint modelmatrixid,
     glVertexAttribPointer(_glcolorattrib, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
     glDrawArrays(GL_POINTS, 0, _size);
+
+    glDisableVertexAttribArray(_glvertexattrib);
+    glDisableVertexAttribArray(_glcolorattrib);
 }
 
 // Returns false if system has exceeded runtime

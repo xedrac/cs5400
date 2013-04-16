@@ -16,11 +16,6 @@ using namespace std;
 GameState::GameState()
     : _playermovestate(0)
 {
-    _program = cs5400::make_program(cs5400::make_vertexShader("shaders/vertex.glsl"),
-                                    cs5400::make_fragmentShader("shaders/fragment.glsl"));
-
-    _programParticles = cs5400::make_program(cs5400::make_vertexShader("shaders/vertex_particle.glsl"),
-                                             cs5400::make_fragmentShader("shaders/fragment_particle.glsl"));
 
     Light light1(glm::vec3(0.0, 1.0, 1.5),  // position
                  glm::vec3(0.9, 1.0, 0.8),  // diffuse
@@ -33,7 +28,10 @@ GameState::GameState()
     _camera.setScene(&_scene);
     _camera.setPosition(glm::vec3(0.0f, 0.0f, 1.8f));
 
-    _skybox = make_shared<SkyBox>(SkyBox(_program->getHandle(),
+    _program          = _scene.getProgram()->getHandle();
+    _programParticles = _scene.getProgramParticles()->getHandle();
+
+    _skybox = make_shared<SkyBox>(SkyBox(_program,
                                          "textures/grimmnight-top.png",
                                          "textures/grimmnight-bottom.png",
                                          "textures/grimmnight-left.png",
@@ -45,6 +43,7 @@ GameState::GameState()
     shared_ptr<Mesh> bunnymesh        = loadMesh("bunny",  "models/bunny.ply");
     shared_ptr<Mesh> spacefrigatemesh = loadMesh("space_frigate",  "models/space_frigate.obj");
     shared_ptr<Mesh> spaceshipmesh    = loadMesh("spaceship",  "models/spaceship.obj");
+
 }
 
 
@@ -58,7 +57,7 @@ void GameState::init()
     glm::vec3 enemyrotate = glm::vec3(90.0, 0.0, 90.0);
     loadEnemyShips(_meshes["space_frigate"], enemyrows, enemycols, enemyspeed, enemyscale, enemyrotate);
 
-    _playership = make_shared<Spaceship>(Spaceship(_program->getHandle(),
+    _playership = make_shared<Spaceship>(Spaceship(_program,
                                                    _meshes["space_frigate"],
                                                    glm::vec3(0.0f, -0.6f, 0.0f ),         // position
                                                    glm::vec3(0.004f, 0.004f, 0.004f),  // scale
@@ -169,7 +168,7 @@ void GameState::onSpecialKey(int key, int, int)
 
 void GameState::fireProjectile(glm::vec3 position, glm::vec3 direction, float scale, float speed, bool fromenemy)
 {
-    shared_ptr<Projectile> p = make_shared<Projectile>(Projectile(_program->getHandle(),
+    shared_ptr<Projectile> p = make_shared<Projectile>(Projectile(_program,
                                                                   _meshes["bunny"],
                                                                   position,
                                                                   glm::vec3(scale, scale, scale),
@@ -401,7 +400,7 @@ void GameState::loadEnemyShips(shared_ptr<Mesh> mesh, int enemyrows, int enemyco
         float ypos = (row - halfrows) * 0.1 + 0.4;
         for (int col=0; col<enemycols; col++) {
             float xpos = col*xgap - halfwidth;
-            enemy = make_shared<Spaceship>(Spaceship(_program->getHandle(),
+            enemy = make_shared<Spaceship>(Spaceship(_program,
                                                      mesh,
                                                      glm::vec3(xpos, ypos, 0.0f), // position
                                                      glm::vec3(scale),            // scale
@@ -415,7 +414,7 @@ void GameState::loadEnemyShips(shared_ptr<Mesh> mesh, int enemyrows, int enemyco
 
 void GameState::makeExplosion(glm::vec3 position)
 {
-    std::shared_ptr<ParticleSystem> ps = make_shared<ParticleSystem>(ParticleSystem(_programParticles->getHandle(), ParticleSystemType::Explosion, 5, position));
+    std::shared_ptr<ParticleSystem> ps = make_shared<ParticleSystem>(ParticleSystem(_programParticles, ParticleSystemType::Explosion, 5, position));
     _particlesystems.push_back(ps);
     _scene.insertParticleSystem(ps);
 }
