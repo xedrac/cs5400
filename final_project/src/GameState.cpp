@@ -63,11 +63,6 @@ void GameState::init()
     _playership->setId(_scene.getNewObjectId());
     _scene.insertObject(_playership);
 
-    // test particle system
-    std::shared_ptr<ParticleSystem> ps = make_shared<ParticleSystem>(ParticleSystem(_programParticles->getHandle(), 250, 5, glm::vec3(0.0)));
-    _particlesystems.push_back(ps);
-    _scene.insertParticleSystem(ps);
-
     refreshTime();
 
     _camera.setScene(&_scene);
@@ -290,6 +285,7 @@ void GameState::updateObjectState()
             }
 
             // BOOM!  Destroy enemy ship & projectile
+            makeExplosion(enemy->getPosition());
             _scene.removeObject(enemy);
             _scene.removeObject(projectile);
             
@@ -330,6 +326,21 @@ void GameState::updateObjectState()
         //break;
 	}
 
+    // update particle systems
+    auto ppp = _particlesystems.begin();
+    while (ppp != _particlesystems.end()) {
+        shared_ptr<ParticleSystem> ps = *ppp;
+    
+        if (ps->update(elapsedms)) {
+            ++ppp;
+            continue;
+        }
+    
+        // system needs to be removed
+        ps->hide();
+        ppp = _particlesystems.erase(ppp);
+    }
+
 #if 0
 	// for demo, if we have a collision we'll change light to red, otherwise the green
 	if (collision) {
@@ -341,18 +352,6 @@ void GameState::updateObjectState()
 		//_lights[0].setDiffuse(glm::vec3(0.9, 1.0, 0.8));
     }
 #endif
-
-    // update particle systems
-    for (size_t i=0; i<_particlesystems.size(); i++) {
-        if (!_particlesystems[i]->update(elapsedms)) {
-            _particlesystems[i]->hide(); // hide for now, would be best to delete somehow
-
-            // test particle system
-            std::shared_ptr<ParticleSystem> ps = make_shared<ParticleSystem>(ParticleSystem(_programParticles->getHandle(), 250, 5, glm::vec3(0.0)));
-            _particlesystems.push_back(ps);
-            _scene.insertParticleSystem(ps);
-        }
-    }
 
 	// set new last update time
 	_lastupdate = glutGet(GLUT_ELAPSED_TIME);
@@ -404,5 +403,9 @@ void GameState::loadEnemyShips(shared_ptr<Mesh> mesh, int enemyrows, int enemyco
     }
 }
 
-
-
+void GameState::makeExplosion(glm::vec3 position)
+{
+    std::shared_ptr<ParticleSystem> ps = make_shared<ParticleSystem>(ParticleSystem(_programParticles->getHandle(), 250, 5, position));
+    _particlesystems.push_back(ps);
+    _scene.insertParticleSystem(ps);
+}

@@ -39,6 +39,7 @@ private:
 	void updateObjectState();  // update all objects in scene
 	void refreshTime();        // refresh time before starting a scene render (after models are added)
     void fireProjectile(glm::vec3 position, glm::vec3 direction, float scale, float speed, bool fromenemy);
+    void makeExplosion(glm::vec3 position);
 
     std::shared_ptr<cs5400::Program> getProgram() { return _program; }
 
