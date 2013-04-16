@@ -15,7 +15,12 @@ Projectile::Projectile(GLuint program,
       _direction(direction),
       _speed(speed)
 {
-
+    Material m;
+    m.setAmbient(glm::vec3(0.1, 0.1, 0.1));
+    m.setDiffuse(glm::vec3(0.831, 0.628, 0.215));
+    m.setSpecular(glm::vec3(1.0, 1.0, 1.0));
+    m.setShininess(100.0);
+    setMaterial(m);
 }
 
 

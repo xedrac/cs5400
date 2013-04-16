@@ -2,6 +2,9 @@ varying vec4  position_ws;           // position of vertex/fragment in world spa
 varying vec3  normal_ws;             // normal of vertex/fragment in world space
 varying vec2  UV;                    // UV coordinate for texturing
 
+uniform int   lightswitch;
+uniform int   textureswitch;
+
 uniform vec4  camerapos_ws;          // camera position in world space
 uniform vec4  lightpos_ws[5];        // light position(s) in world space
 uniform vec4  lightdiffuse[5];       // light diffuse component(s)
@@ -18,6 +21,7 @@ uniform vec4  materialspecular;
 uniform vec3  sceneambient;          // ambient light in the scene
 uniform mat4  V_inv;
 uniform sampler2D texturesampler;
+
 
 
 vec4 shade()
@@ -79,8 +83,13 @@ vec4 shade()
 
 void main() 
 {
-    vec4 lightedcolor = shade();
-    vec4 texturedcolor = texture2D(texturesampler, UV).rgba;
+    vec4 lightedcolor  = vec4(0,0,0,0);
+    vec4 texturedcolor = vec4(0,0,0,0);
+
+    if (lightswitch == 1)
+        lightedcolor = shade();
+    if (textureswitch == 1)
+        texturedcolor = texture2D(texturesampler, UV).rgba;
 
     gl_FragColor = lightedcolor + texturedcolor;
 }

@@ -65,8 +65,8 @@ void GameState::init()
                                                    -1,                                    // direction
                                                    0.0004));                              // speed
     Material m;
-    m.setAmbient(glm::vec3(0.2, 0.2, 0.2));
-    m.setDiffuse(glm::vec3(1.0, 1.0, 0.5));
+    m.setAmbient(glm::vec3(0.2, 0.2, 0.5));
+    m.setDiffuse(glm::vec3(0.4, 0.4, 0.9));
     m.setSpecular(glm::vec3(0.9, 0.9, 0.9));
     m.setShininess(100.0);
 
