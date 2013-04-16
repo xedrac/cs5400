@@ -1,5 +1,6 @@
 
 #include "BoundingBox.hpp"
+#include <iostream>
 
 using namespace std;
 
@@ -18,15 +19,9 @@ BoundingBox::BoundingBox(const Box3D &box)
 // Checks to see if two BoundingBoxes overlap.  Assumes axis-aligned edges
 bool BoundingBox::intersects(const BoundingBox &other) const
 {
-    return !((_box.x0 > other.getBox().x1 || _box.x1 < other.getBox().x0) ||
-             (_box.y0 > other.getBox().y1 || _box.y1 < other.getBox().y0) ||
-             (_box.z0 > other.getBox().z1 || _box.z1 < other.getBox().z0));
-}
-
-void BoundingBox::setBox(const Box3D &box)
-{
-    _box = box;
-    setPoints();
+    return ((_xbox.x0 < other.getBounds().x1 && _xbox.x1 > other.getBounds().x0) &&
+            (_xbox.y0 < other.getBounds().y1 && _xbox.y1 > other.getBounds().y0) &&
+            (_xbox.z0 < other.getBounds().z1 && _xbox.z1 > other.getBounds().z0));
 }
 
 void BoundingBox::setPoints()
@@ -76,3 +71,4 @@ void BoundingBox::update(glm::mat4 matrix)
 
 	calcBounds();
 }
+

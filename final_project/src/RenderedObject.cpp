@@ -18,9 +18,11 @@ RenderedObject::RenderedObject(GLuint program,
       _mesh(mesh),
       _boundingbox(mesh->getBoundingBox()),
 	  _position(position),
-	  _rotation(rotation),
+	  _initialrotation(rotation),
+      _rotation(glm::vec3(0.0f, 0.0f, 0.0f)),
       _scale(scale),
       _visible(true),
+      //_showbounds(false),
       _texture("../textures/mycheckered_darkest.png") // TODO: remove this in the future
 {
     setModelMatrix(glm::mat4(1.0));
@@ -71,6 +73,51 @@ void RenderedObject::storeTextureCoords()
     glBindBuffer(GL_ARRAY_BUFFER, _gluvbuffer);
     glBufferData(GL_ARRAY_BUFFER, uvcoords.size()*sizeof(GLfloat), &uvcoords[0], GL_STATIC_DRAW);
 }
+
+
+#if 0
+void RenderedObject::addBoundPoint(const glm::vec3 &p)
+{
+    _boundpoints.push_back(p.x);
+    _boundpoints.push_back(p.y);
+    _boundpoints.push_back(p.z);
+    _boundpoints.push_back(1.0);
+}
+
+void RenderedObject::storeBoundsPoints()
+{
+    Box3D bounds = _boundingbox.getBounds();
+    glm::vec3 p1(bounds.x0, bounds.y0, bounds.z0);
+    glm::vec3 p2(bounds.x1, bounds.y0, bounds.z0);
+    glm::vec3 p3(bounds.x0, bounds.y1, bounds.z0);
+    glm::vec3 p4(bounds.x1, bounds.y1, bounds.z0);
+    glm::vec3 p5(bounds.x0, bounds.y0, bounds.z1);
+    glm::vec3 p6(bounds.x1, bounds.y0, bounds.z1);
+    glm::vec3 p7(bounds.x0, bounds.y1, bounds.z1);
+    glm::vec3 p8(bounds.x1, bounds.y1, bounds.z1);
+
+    _boundpoints.clear();
+    addBoundPoint(p1);
+    addBoundPoint(p2);
+    addBoundPoint(p4);
+    addBoundPoint(p3);
+    addBoundPoint(p1);
+    addBoundPoint(p5);
+    addBoundPoint(p7);
+    addBoundPoint(p8);
+    addBoundPoint(p6);
+    addBoundPoint(p5);
+    addBoundPoint(p7);
+    addBoundPoint(p3);
+    addBoundPoint(p4);
+    addBoundPoint(p8);
+    addBoundPoint(p6);
+    addBoundPoint(p2);
+
+    glBindBuffer(GL_ARRAY_BUFFER, _glvertexbuffer);
+    glBufferData(GL_ARRAY_BUFFER, _boundpoints.size()*sizeof(GLfloat), _boundpoints.data(), GL_STATIC_DRAW);
+}
+#endif
 
 
 // Store the vertices in a GPU buffer
@@ -161,6 +208,19 @@ void RenderedObject::render(GLuint modelmatrixid, GLuint modelinvtranspmatrixid)
     glUniformMatrix4fv(modelmatrixid, 1, GL_FALSE, glm::value_ptr(_modelmatrix));
     glUniformMatrix3fv(modelinvtranspmatrixid, 1, GL_FALSE, glm::value_ptr(_modelinvtranspmatrix));
 
+    GLfloat shininess  = _material.getShininess();
+    glm::vec4 ambient  = glm::vec4(_material.getAmbient(), 1.0);
+    glm::vec4 diffuse  = glm::vec4(_material.getDiffuse(), 1.0);
+    glm::vec4 specular = glm::vec4(_material.getSpecular(), 1.0);
+
+    glUniform1f(_glshininess, shininess);
+    glUniform4f(_glambient,  ambient.r,  ambient.g,  ambient.b,  ambient.w);
+    glUniform4f(_gldiffuse,  diffuse.r,  diffuse.g,  diffuse.b,  ambient.w);
+    glUniform4f(_glspecular, specular.r, specular.g, specular.b, ambient.w);
+
+    //if (_showbounds)
+    //    storePoints();
+
     glEnableVertexAttribArray(_glvertexattrib);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glmeshbuffer);
     glBindBuffer(GL_ARRAY_BUFFER, _glvertexbuffer);
@@ -184,27 +244,32 @@ void RenderedObject::render(GLuint modelmatrixid, GLuint modelinvtranspmatrixid)
     glDisableVertexAttribArray(_glnormalattrib);
     glDisableVertexAttribArray(_gluvattrib);
 
-    GLfloat shininess  = _material.getShininess();
-    glm::vec4 ambient  = glm::vec4(_material.getAmbient(), 1.0);
-    glm::vec4 diffuse  = glm::vec4(_material.getDiffuse(), 1.0);
-    glm::vec4 specular = glm::vec4(_material.getSpecular(), 1.0);
-
-    glUniform1f(_glshininess, shininess);
-    glUniform4f(_glambient, ambient.r, ambient.g, ambient.b, ambient.w);
-    glUniform4f(_gldiffuse, diffuse.r, diffuse.g, diffuse.b, ambient.w);
-    glUniform4f(_glspecular, specular.r, specular.g, specular.b, ambient.w);
+#if 0
+    // Draw the bounding box
+    if (_showbounds) {
+        storeBoundsPoints();
+        glEnableVertexAttribArray(_glvertexattrib);
+        glBindBuffer(GL_ARRAY_BUFFER, _glvertexbuffer);
+        glVertexAttribPointer(_glvertexattrib, 4, GL_FLOAT, GL_FALSE, 0, 0);
+        glDrawArrays(GL_LINE_LOOP, 0, _boundpoints.size()/sizeof(GLfloat));
+        glDisableVertexAttribArray(_glvertexattrib);
+    }
+#endif
 }
 
 
 void RenderedObject::calculateModelMatrix()
 {
     glm::mat4 matrix = glm::mat4(1.0);
+    GLfloat rotx = _initialrotation.x + _rotation.x;
+    GLfloat roty = _initialrotation.y + _rotation.y;
+    GLfloat rotz = _initialrotation.z + _rotation.z;
 
     matrix = glm::translate(matrix, _position);
-    matrix = glm::scale    (matrix, _scale);
-    matrix = glm::rotate   (matrix, _rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-    matrix = glm::rotate   (matrix, _rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-    matrix = glm::rotate   (matrix, _rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+    matrix = glm::rotate(matrix, rotz, glm::vec3(0, 0, 1));
+    matrix = glm::rotate(matrix, roty, glm::vec3(0, 1, 0));
+    matrix = glm::rotate(matrix, rotx, glm::vec3(1, 0, 0));
+    matrix = glm::scale (matrix, _scale);
 
     _modelmatrix = matrix;
     _modelinvtranspmatrix = glm::inverseTranspose(glm::mat3(matrix));

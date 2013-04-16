@@ -75,9 +75,12 @@ public:
 
 protected:
     void storePoints();
+    void storeBoundsPoints();
     void storeNormals();
     void storeMesh();
     void storeTextureCoords();
+
+    void addBoundPoint(const glm::vec3 &p);
 
 protected:
     objectid_t _id;  // unique identifier given by the scene
@@ -88,9 +91,13 @@ private:
     glm::mat4 _modelmatrix;
     glm::mat3 _modelinvtranspmatrix;
 	glm::vec3 _position;
+    glm::vec3 _initialrotation;
 	glm::vec3 _rotation;
     glm::vec3 _scale;
     bool _visible;
+    bool _showbounds;
+
+    std::vector<GLfloat> _boundpoints;
 
     GLuint _glvertexbuffer;
     GLuint _glnormalbuffer;

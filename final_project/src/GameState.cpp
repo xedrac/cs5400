@@ -28,62 +28,37 @@ void GameState::init()
                  glm::vec3(0.9, 1.0, 0.8),  // diffuse
                  glm::vec3(1.0, 1.0, 1.0)); // specular
 
-    //Light light2(glm::vec3(0.0,-1.0, 4.0),  // position
-    //             glm::vec3(0.9, 1.0, 0.8),  // diffuse
-    //             glm::vec3(1.0, 1.0, 1.0)); // specular
-
     _scene.init();
     _scene.addLight(light1);
-    //_scene.addLight(light2);
     _scene.setAmbientLight(glm::vec3(0.1, 0.1, 0.1));
 
     shared_ptr<Mesh> bunnymesh        = loadMesh("bunny",  "models/bunny.ply");
-    //shared_ptr<Mesh> dragonmesh = loadMesh("dragon", "models/dragon.ply");
     shared_ptr<Mesh> spacefrigatemesh = loadMesh("space_frigate",  "models/space_frigate.obj");
     shared_ptr<Mesh> spaceshipmesh    = loadMesh("spaceship",  "models/spaceship.obj");
 
-#if 0
-    int enemyrows = 5;
-    int enemycols = 12;
-    float enemyspeed = 0.0002;
-    float enemyscale = 0.55;
-    glm::vec3 enemyrotate = glm::vec3(0.0f);
-    loadEnemyShips(bunnymesh, enemyrows, enemycols, enemyspeed, enemyscale, enemyrotate);
-#else
-    int enemyrows = 2;
-    int enemycols = 2;
+    int enemyrows = 4;
+    int enemycols = 8;
     float enemyspeed = 0.0002;
     float enemyscale = 0.003;
-    glm::vec3 enemyrotate = glm::vec3(90.0, 90.0, 0.0);
+    glm::vec3 enemyrotate = glm::vec3(90.0, 0.0, 90.0);
     loadEnemyShips(spacefrigatemesh, enemyrows, enemycols, enemyspeed, enemyscale, enemyrotate);
-#endif 
-
-#if 0
-    int enemyrows = 7;
-    int enemycols = 12;
-    float enemyspeed = 0.0002;
-    float enemyscale = 0.0001;
-    glm::vec3 enemyrotate = glm::vec3(90.0, 270.0, 0.0);
-    loadEnemyShips(spaceshipmesh, enemyrows, enemycols, enemyspeed, enemyscale, enemyrotate);
-#endif
 
     _playership = make_shared<Spaceship>(Spaceship(_program->getHandle(),
-                                                   spaceshipmesh,
+                                                   spacefrigatemesh,
                                                    glm::vec3(0.0f, -0.6f, 0.0f ),         // position
-                                                   glm::vec3(0.0001f, 0.0001f, 0.0001f),  // scale
-                                                   glm::vec3(90.0f,  90.0f, 0.0f ),       // rotation
+                                                   glm::vec3(0.004f, 0.004f, 0.004f),  // scale
+                                                   glm::vec3(90.f, 0.f, -90.f),            // rotation
                                                    -1,                                    // direction
-                                                   0.0001));                              // speed
-
-    _playership->setId(_scene.getNewObjectId());
-    _scene.insertObject(_playership);
-
+                                                   0.0004));                              // speed
     Material m;
     m.setAmbient(glm::vec3(0.2, 0.2, 0.5));
     m.setDiffuse(glm::vec3(0.4, 0.4, 1.0));
-    m.setSpecular(glm::vec3(1.0, 1.0, 1.0));
+    m.setSpecular(glm::vec3(0.9, 0.9, 0.9));
     m.setShininess(100.0);
+
     _playership->setMaterial(m);
+    _playership->setId(_scene.getNewObjectId());
+    _scene.insertObject(_playership);
 
     // test particle system
     std::shared_ptr<ParticleSystem> ps = make_shared<ParticleSystem>(ParticleSystem(10));
@@ -110,8 +85,10 @@ void GameState::gameLoop()
         glutMainLoopEvent();  // process any glut events that have queued up
         updateObjectState();  // move game objects as appropriate
 
-        if (_gameover)
+        if (_gameover) {
+            cout << "Game Over\n";
             return;
+        }
 
         // Clear the background as black
         glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -182,55 +159,39 @@ void GameState::onSpecialKey(int key, int, int)
 }
 
 
+void GameState::fireProjectile(glm::vec3 position, glm::vec3 direction, float scale, float speed, bool fromenemy)
+{
+    shared_ptr<Projectile> p = make_shared<Projectile>(Projectile(_program->getHandle(),
+                                                                  _meshes["bunny"],
+                                                                  position,
+                                                                  glm::vec3(scale, scale, scale),
+                                                                  glm::vec3(1.0f),           
+                                                                  direction,
+                                                                  speed));
+    if (fromenemy) _enemyprojectiles.push_back(p);
+    else           _playerprojectiles.push_back(p);
+
+    p->setId(_scene.getNewObjectId());
+    _scene.insertObject(p);
+}
+
+
 void GameState::onMouseButton(int button, int state, int, int)
 {
     switch (button) {
     case GLUT_LEFT_BUTTON:
-        if (state == GLUT_DOWN) {
-            shared_ptr<Projectile> p = make_shared<Projectile>(
-                                            Projectile(_program->getHandle(),
-                                                       _meshes["bunny"],
-                                                       _playership->getPosition(),   // position
-                                                       glm::vec3(0.1f, 0.1f, 0.1f),  // scale
-                                                       glm::vec3(1.0f),              // rotation
-                                                       glm::vec3(0.0f, 1.0f, 0.0f),  // direction
-                                                       0.001));                      // speed
-            p->setId(_scene.getNewObjectId());
-            _playerprojectiles.push_back(p);
-            _scene.insertObject(p);
-        }
+        if (state == GLUT_DOWN)
+            fireProjectile(_playership->getPosition(), glm::vec3(0.0f, 1.0f, 0.0f), 0.1, 0.001, false);
         break;
 
     case GLUT_RIGHT_BUTTON:
-        if (state == GLUT_DOWN) {
-            shared_ptr<Projectile> p = make_shared<Projectile>(
-                                            Projectile(_program->getHandle(),
-                                                       _meshes["bunny"],
-                                                       _playership->getPosition(),   // position
-                                                       glm::vec3(0.5f, 0.5f, 0.5f),  // scale
-                                                       glm::vec3(1.0f),              // rotation
-                                                       glm::vec3(0.0f, 1.0f, 0.0f),  // direction
-                                                       0.001));                      // speed
-            p->setId(_scene.getNewObjectId());
-            _playerprojectiles.push_back(p);
-            _scene.insertObject(p);
-        }
+        if (state == GLUT_DOWN)
+            fireProjectile(_playership->getPosition(), glm::vec3(0.0f, 1.0f, 0.0f), 0.5, 0.001, false);
         break;
 
     case GLUT_MIDDLE_BUTTON:
-        if (state == GLUT_DOWN) {
-            shared_ptr<Projectile> p = make_shared<Projectile>(
-                                            Projectile(_program->getHandle(),
-                                                       _meshes["bunny"],
-                                                       _playership->getPosition(),   // position
-                                                       glm::vec3(1.5f, 1.5f, 1.5f),  // scale
-                                                       glm::vec3(1.0f),              // rotation
-                                                       glm::vec3(0.0f, 1.0f, 0.0f),  // direction
-                                                       0.001));                      // speed
-            p->setId(_scene.getNewObjectId());
-            _playerprojectiles.push_back(p);
-            _scene.insertObject(p);
-        }
+        if (state == GLUT_DOWN)
+            fireProjectile(_playership->getPosition(), glm::vec3(0.0f, 1.0f, 0.0f), 1.5, 0.001, false);
         break;
 
     case 3:  _camera.moveZ(0.02);  break;
@@ -340,19 +301,33 @@ void GameState::updateObjectState()
     }
 
 
-
-
-
-#if 0
     // check if player ship collides with enemy ship
-    bool collision = false;
+    // bool collision = false;
+    Box3D box = _playership->getBoundingBox().getBounds();
+    //cout << "Player BoundingBox: (" << box.x0 << "," << box.x1 << ") "
+    //                         << "(" << box.y0 << "," << box.y1 << ") "
+    //                         << "(" << box.z0 << "," << box.z1 << ")\n";
     for (size_t i=0; i<_enemyships.size(); i++) {
-        if (!_playership->intersects(_enemyships[i]))
-            continue;
-        collision = true;
-        break;
+        box = _enemyships[i]->getBoundingBox().getBounds();
+        if (_playership->intersects(_enemyships[i])) {
+            //cout << "Enemy[" << i << "] BoundingBox: " << "(" << box.x0 << "," << box.x1 << ") "
+            //                                           << "(" << box.y0 << "," << box.y1 << ") "
+            //                                           << "(" << box.z0 << "," << box.z1 << ")\n";
+            //cout << "player intersected enemy " << i << endl;
+            Material m;
+            m.setAmbient(glm::vec3(0.3, 0.2, 0.2));
+            m.setDiffuse(glm::vec3(0.8, 0.3, 0.3));
+            m.setSpecular(glm::vec3(0.8, 0.8, 0.8));
+            m.setShininess(100.0);
+            _enemyships[i]->setMaterial(m);
+            _enemyships[i]->rotate(glm::vec3(0, 0, 0), 2.0f);
+        }
+
+        //collision = true;
+        //break;
 	}
 
+#if 0
 	// for demo, if we have a collision we'll change light to red, otherwise the green
 	if (collision) {
         //TODO:  player ship dies - cause explosion
@@ -379,7 +354,6 @@ void GameState::addEnemy(shared_ptr<Spaceship> enemy)
 {
     if (enemy->getId() == INVALID_OBJECTID)
         enemy->setId(_scene.getNewObjectId());
-
     _enemyships.push_back(enemy);
     _scene.insertObject(enemy);
 }
@@ -394,34 +368,23 @@ void GameState::loadEnemyShips(shared_ptr<Mesh> mesh, int enemyrows, int enemyco
     if (enemycols > 20) enemycols = 20;
     if (enemyrows > 10) enemyrows = 10;
 
-    // half of the columns minus the center column
-    //int halfcols = (int)(enemycols / 2);
-    int halfrows = (int)(enemyrows / 2);
-
+    int halfrows      = (int)(enemyrows / 2);
     float screenwidth = 1.8;  // (-1.0, 1.0)
-    float halfwidth = screenwidth / 2.0f;
-    float xgap = screenwidth / enemycols;
+    float halfwidth   = screenwidth / 2.0f;
+    float xgap        = screenwidth / enemycols;
 
     for (int row=0; row<enemyrows; row++) {
         float ypos = (row - halfrows) * 0.1 + 0.4;
         for (int col=0; col<enemycols; col++) {
             float xpos = col*xgap - halfwidth;
-            //float xpos = (col - halfcols) * 0.1;
             enemy = make_shared<Spaceship>(Spaceship(_program->getHandle(),
                                                      mesh,
                                                      glm::vec3(xpos, ypos, 0.0f), // position
                                                      glm::vec3(scale),            // scale
-                                                     glm::vec3(0.0f, 0.0f, 0.0f), // rotation
+                                                     glm::vec3(rot.x, rot.y, rot.z), // rotation
                                                      1,                           // direction
                                                      speed));                     // speed
-
-            enemy->rotate(glm::vec3(rot.x,   0.f,   0.f), rot.x);
-            enemy->rotate(glm::vec3(  0.f, rot.y,   0.f), rot.y);
-            enemy->rotate(glm::vec3(  0.f,   0.f, rot.z), rot.z);
-
             addEnemy(enemy);
-
-
         }
     }
 }
