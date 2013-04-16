@@ -40,6 +40,7 @@ private:
 	void updateObjectState();  // update all objects in scene
 	void refreshTime();        // refresh time before starting a scene render (after models are added)
     void fireProjectile(glm::vec3 position, glm::vec3 direction, float scale, float speed, bool fromenemy);
+    void makeExplosion(glm::vec3 position);
 
     std::shared_ptr<cs5400::Program> getProgram() { return _program; }
 
@@ -56,6 +57,7 @@ private:
 
     std::map<std::string, std::shared_ptr<Mesh>> _meshes;
     std::shared_ptr<cs5400::Program>             _program;
+    std::shared_ptr<cs5400::Program>             _programParticles;
     std::vector<std::shared_ptr<Spaceship>>      _enemyships;
     std::shared_ptr<Spaceship>                   _playership;
     std::vector<std::shared_ptr<ParticleSystem>> _particlesystems;

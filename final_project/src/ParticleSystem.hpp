@@ -10,16 +10,25 @@
 class ParticleSystem
 {
 public:
-    ParticleSystem(int size);
-    void render();
+    ParticleSystem(GLuint program, int size, GLfloat particleSize, glm::vec3 startposition);
+    void render(GLuint modelmatrixid, GLuint viewmatrixid, GLuint projectionmatrixid, const glm::mat4 &viewmatrix, const glm::mat4 &projectionmatrix);
+    bool update(int elapsedms); // return false if system has finished runtime
+
+    void hide();
 
 private:
     std::vector<Particle> _particles;
     bool _visible;
-    GLuint _glparticle;
+    GLuint _particleprogram;
+    GLuint _glvertexbuffer;
+    GLuint _glcolorbuffer;
     int _size;
+    GLfloat _particlesize;
+    int _totalelapsed;
+    float _runtime;
 
-    void hide();
+    GLint _glvertexattrib;
+    GLint _glcolorattrib;
 };
 
 #endif

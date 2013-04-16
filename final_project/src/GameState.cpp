@@ -19,6 +19,9 @@ GameState::GameState()
     _program = cs5400::make_program(cs5400::make_vertexShader("shaders/vertex.glsl"),
                                     cs5400::make_fragmentShader("shaders/fragment.glsl"));
 
+    _programParticles = cs5400::make_program(cs5400::make_vertexShader("shaders/vertex_particle.glsl"),
+                                             cs5400::make_fragmentShader("shaders/fragment_particle.glsl"));
+
     Light light1(glm::vec3(0.0, 1.0, 1.5),  // position
                  glm::vec3(0.9, 1.0, 0.8),  // diffuse
                  glm::vec3(1.0, 1.0, 1.0)); // specular
@@ -71,11 +74,6 @@ void GameState::init()
     _playership->setMaterial(m);
     _playership->setId(_scene.getNewObjectId());
     _scene.insertObject(_playership);
-
-    // test particle system
-    std::shared_ptr<ParticleSystem> ps = make_shared<ParticleSystem>(ParticleSystem(10));
-    _particlesystems.push_back(ps);
-    _scene.insertParticleSystem(ps);
 
     refreshTime();
 
@@ -297,6 +295,7 @@ void GameState::updateObjectState()
             }
 
             // BOOM!  Destroy enemy ship & projectile
+            makeExplosion(enemy->getPosition());
             _scene.removeObject(enemy);
             _scene.removeObject(projectile);
             
@@ -336,6 +335,21 @@ void GameState::updateObjectState()
         //collision = true;
         //break;
 	}
+
+    // update particle systems
+    auto ppp = _particlesystems.begin();
+    while (ppp != _particlesystems.end()) {
+        shared_ptr<ParticleSystem> ps = *ppp;
+    
+        if (ps->update(elapsedms)) {
+            ++ppp;
+            continue;
+        }
+    
+        // system needs to be removed
+        ps->hide();
+        ppp = _particlesystems.erase(ppp);
+    }
 
 #if 0
 	// for demo, if we have a collision we'll change light to red, otherwise the green
@@ -399,5 +413,9 @@ void GameState::loadEnemyShips(shared_ptr<Mesh> mesh, int enemyrows, int enemyco
     }
 }
 
-
-
+void GameState::makeExplosion(glm::vec3 position)
+{
+    std::shared_ptr<ParticleSystem> ps = make_shared<ParticleSystem>(ParticleSystem(_programParticles->getHandle(), 250, 5, position));
+    _particlesystems.push_back(ps);
+    _scene.insertParticleSystem(ps);
+}

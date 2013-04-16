@@ -18,13 +18,22 @@ void Scene::init()
 {
     _program = cs5400::make_program(cs5400::make_vertexShader("shaders/vertex.glsl"),
                                     cs5400::make_fragmentShader("shaders/fragment.glsl"));
+
+    _programParticles = cs5400::make_program(cs5400::make_vertexShader("shaders/vertex_particle.glsl"),
+                                            cs5400::make_fragmentShader("shaders/fragment_particle.glsl"));
+
     GLuint handle = _program->getHandle();
+    GLuint particlehandle = _programParticles->getHandle();
 
     _glModelMatrix          = glGetUniformLocation(handle, "M");
     _glViewMatrix           = glGetUniformLocation(handle, "V");
     _glProjectionMatrix     = glGetUniformLocation(handle, "P");
     _glModelInvTranspMatrix = glGetUniformLocation(handle, "M_inv_transpose");
     _glViewInverseMatrix    = glGetUniformLocation(handle, "V_inv");
+
+    _glModelMatrixParticles      = glGetUniformLocation(particlehandle, "M");
+    _glViewMatrixParticles       = glGetUniformLocation(particlehandle, "V");
+    _glProjectionMatrixParticles = glGetUniformLocation(particlehandle, "P");
 
     _glLightPosition      = glGetUniformLocation(handle, "lightpos_ws");
     _glLightAmbient       = glGetUniformLocation(handle, "lightambient");
@@ -156,6 +165,6 @@ void Scene::render(const glm::vec3 &eyeposition,
     // now render each particle system
     for (size_t i=0; i<_particlesystems.size(); i++) {
         if (_particlesystems[i] != nullptr)
-            _particlesystems[i]->render();
+            _particlesystems[i]->render(_glModelMatrixParticles, _glViewMatrixParticles, _glProjectionMatrixParticles, viewmatrix, projectionmatrix);
     }
 }
