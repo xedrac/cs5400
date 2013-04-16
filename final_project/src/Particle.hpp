@@ -15,6 +15,7 @@ public:
     void setPosition(glm::vec3 position);
     void setVelocity(glm::vec3 velocity);
     void fadeout(float percent);
+    void addColor(glm::vec3 color);
 
 private:
     glm::vec4 _color;

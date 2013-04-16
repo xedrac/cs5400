@@ -17,7 +17,7 @@ enum ParticleSystemType
 class ParticleSystem
 {
 public:
-    ParticleSystem(GLuint program, ParticleSystemType type, GLfloat particleSize, glm::vec3 startposition);
+    ParticleSystem(GLuint program, ParticleSystemType type, glm::vec3 startposition);
     void render(GLuint modelmatrixid, GLuint viewmatrixid, GLuint projectionmatrixid, const glm::mat4 &viewmatrix, const glm::mat4 &projectionmatrix);
     bool update(int elapsedms); // return false if system has finished runtime
 
@@ -37,6 +37,9 @@ private:
 
     GLint _glvertexattrib;
     GLint _glcolorattrib;
+
+    void createExplosion(glm::vec3 position);
+    void createPlayerExhaust(glm::vec3 position);
 };
 
 #endif

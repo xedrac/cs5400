@@ -47,6 +47,11 @@ void Particle::fadeout(float percent)
     _color.a -= percent;
 }
 
+void Particle::addColor(glm::vec3 color)
+{
+    _color += glm::vec4(color, 0.0);
+}
+
 void Particle::hide()
 {
     _visible = false;

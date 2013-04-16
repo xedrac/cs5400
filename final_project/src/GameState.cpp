@@ -233,6 +233,15 @@ void GameState::updateObjectState()
     if (_playermovestate & MoveStateUp)    _playership->translate(glm::vec3( 0.0f,  0.01f, 0.0f));
     if (_playermovestate & MoveStateDown)  _playership->translate(glm::vec3( 0.0f, -0.01f, 0.0f));
 
+    if (_playermovestate & 
+        (MoveStateLeft | 
+         MoveStateRight |
+         MoveStateUp |
+         MoveStateDown)) {
+        // player moving, create exhaust
+        makeExhaust(_playership->getPosition());
+    }
+
 
 	// update all objects' state.  If one enemy changes direction,
     // make all enemies change direction (space invaders!)
@@ -414,7 +423,14 @@ void GameState::loadEnemyShips(shared_ptr<Mesh> mesh, int enemyrows, int enemyco
 
 void GameState::makeExplosion(glm::vec3 position)
 {
-    std::shared_ptr<ParticleSystem> ps = make_shared<ParticleSystem>(ParticleSystem(_programParticles, ParticleSystemType::Explosion, 5, position));
+    std::shared_ptr<ParticleSystem> ps = make_shared<ParticleSystem>(ParticleSystem(_programParticles, ParticleSystemType::Explosion, position));
+    _particlesystems.push_back(ps);
+    _scene.insertParticleSystem(ps);
+}
+
+void GameState::makeExhaust(glm::vec3 position)
+{
+    std::shared_ptr<ParticleSystem> ps = make_shared<ParticleSystem>(ParticleSystem(_programParticles, ParticleSystemType::PlayerExhaust, position));
     _particlesystems.push_back(ps);
     _scene.insertParticleSystem(ps);
 }

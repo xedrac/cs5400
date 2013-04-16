@@ -41,6 +41,7 @@ private:
 	void refreshTime();        // refresh time before starting a scene render (after models are added)
     void fireProjectile(glm::vec3 position, glm::vec3 direction, float scale, float speed, bool fromenemy);
     void makeExplosion(glm::vec3 position);
+    void makeExhaust(glm::vec3 position);
 
     enum MoveState {
         MoveStateLeft  = 0x0001,
