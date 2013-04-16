@@ -31,6 +31,13 @@ SkyBox::SkyBox(GLuint program,
     _right->setTexture(rightimage);
     _front->setTexture(frontimage);
     _back ->setTexture(backimage);
+
+    _top  ->setLightSwitch(false);
+    _bot  ->setLightSwitch(false);
+    _left ->setLightSwitch(false);
+    _right->setLightSwitch(false);
+    _front->setLightSwitch(false);
+    _back ->setLightSwitch(false);
 }
 
 

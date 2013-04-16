@@ -59,7 +59,9 @@ public:
                                             _modelinvtranspmatrix = glm::inverseTranspose(glm::mat3(matrix)); }
     void setMaterial(const Material &m);
     void setTexture (const std::string &texturefile);
-    void setVisible (bool visible)        { _visible  = visible; }
+    void setVisible (bool visible)        { _visible  = visible;    }
+    void setLightSwitch(bool state)       { _applylighting = state; }
+    void setTextureSwitch(bool state)     { _applytexture  = state; }
 
     // Render the object
     void render(GLuint modelmatrixid, GLuint modelinvtranspmatrixid);
@@ -97,6 +99,8 @@ private:
     glm::vec3 _scale;
     bool _visible;
     bool _showbounds;
+    bool _applytexture;
+    bool _applylighting;
 
     std::vector<GLfloat> _boundpoints;
 
@@ -114,6 +118,9 @@ private:
     GLuint _glambient;
     GLuint _gldiffuse;
     GLuint _glspecular;
+
+    GLuint _gltextureswitch;
+    GLuint _gllightswitch;
 
     Material _material;
     std::shared_ptr<Texture> _texture;

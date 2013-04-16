@@ -22,6 +22,8 @@ RenderedObject::RenderedObject(GLuint program,
       _rotation(glm::vec3(0.0f, 0.0f, 0.0f)),
       _scale(scale),
       _visible(true),
+      _applytexture(true),
+      _applylighting(true),
       //_showbounds(false),
       _texture(nullptr)
 {
@@ -35,11 +37,14 @@ RenderedObject::RenderedObject(GLuint program,
     _glvertexattrib   = glGetAttribLocation (program, "vertex_coord");
     _glnormalattrib   = glGetAttribLocation (program, "vertex_normal");
     _gluvattrib       = glGetAttribLocation (program, "uv_coord");
+
     _glshininess      = glGetUniformLocation(program, "shininess");
     _glambient        = glGetUniformLocation(program, "materialambient");
     _gldiffuse        = glGetUniformLocation(program, "materialdiffuse");
     _glspecular       = glGetUniformLocation(program, "materialspecular");
     _gltexturesampler = glGetUniformLocation(program, "texturesampler");
+    _gltextureswitch  = glGetUniformLocation(program, "textureswitch");
+    _gllightswitch    = glGetUniformLocation(program, "lightswitch");
 
     Material m;
     m.setAmbient(glm::vec3(0.2, 0.2, 0.2));
@@ -214,23 +219,28 @@ void RenderedObject::render(GLuint modelmatrixid, GLuint modelinvtranspmatrixid)
     if (!_visible)
         return;
 
-    if (_texture)
+    if (_texture && _applytexture)
         _texture->bindTexture();
 
     glUniformMatrix4fv(modelmatrixid, 1, GL_FALSE, glm::value_ptr(_modelmatrix));
     glUniformMatrix3fv(modelinvtranspmatrixid, 1, GL_FALSE, glm::value_ptr(_modelinvtranspmatrix));
 
-    GLfloat shininess  = _material.getShininess();
-    glm::vec4 ambient  = glm::vec4(_material.getAmbient(), 1.0);
-    glm::vec4 diffuse  = glm::vec4(_material.getDiffuse(), 1.0);
-    glm::vec4 specular = glm::vec4(_material.getSpecular(), 1.0);
+    glUniform1i(_gltextureswitch, (_applytexture? 1: 0));
+    glUniform1i(_gllightswitch,   (_applylighting? 1: 0));
 
-    glUniform1f(_glshininess, shininess);
-    glUniform4f(_glambient,  ambient.r,  ambient.g,  ambient.b,  ambient.w);
-    glUniform4f(_gldiffuse,  diffuse.r,  diffuse.g,  diffuse.b,  ambient.w);
-    glUniform4f(_glspecular, specular.r, specular.g, specular.b, ambient.w);
+    if (_applylighting) {
+        GLfloat shininess  = _material.getShininess();
+        glm::vec4 ambient  = glm::vec4(_material.getAmbient(), 1.0);
+        glm::vec4 diffuse  = glm::vec4(_material.getDiffuse(), 1.0);
+        glm::vec4 specular = glm::vec4(_material.getSpecular(), 1.0);
 
-    if (_texture) {
+        glUniform1f(_glshininess, shininess);
+        glUniform4f(_glambient,  ambient.r,  ambient.g,  ambient.b,  ambient.w);
+        glUniform4f(_gldiffuse,  diffuse.r,  diffuse.g,  diffuse.b,  ambient.w);
+        glUniform4f(_glspecular, specular.r, specular.g, specular.b, ambient.w);
+    }
+
+    if (_texture && _applytexture) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _texture->textureId());
         glUniform1i(_gltexturesampler, 0);
@@ -248,10 +258,11 @@ void RenderedObject::render(GLuint modelmatrixid, GLuint modelinvtranspmatrixid)
     glBindBuffer(GL_ARRAY_BUFFER, _glnormalbuffer);
     glVertexAttribPointer(_glnormalattrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-    glEnableVertexAttribArray(_gluvattrib);
-    glBindBuffer(GL_ARRAY_BUFFER, _gluvbuffer);
-    glVertexAttribPointer(_gluvattrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
+    if (_applytexture) {
+        glEnableVertexAttribArray(_gluvattrib);
+        glBindBuffer(GL_ARRAY_BUFFER, _gluvbuffer);
+        glVertexAttribPointer(_gluvattrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    }
 
     glDrawElements(GL_TRIANGLES, _mesh->faces.size()*3, GL_UNSIGNED_INT, 0);
 
