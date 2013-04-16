@@ -16,8 +16,9 @@ Projectile::Projectile(GLuint program,
       _speed(speed)
 {
     Material m;
-    m.setAmbient(glm::vec3(0.1, 0.1, 0.1));
-    m.setDiffuse(glm::vec3(0.831, 0.628, 0.215));
+    m.setAmbient(glm::vec3(0.0, 0.0, 0.0));
+    //m.setDiffuse(glm::vec3(0.831, 0.628, 0.215));
+    m.setDiffuse(glm::vec3(0.434, 0.433, 0.45));
     m.setSpecular(glm::vec3(1.0, 1.0, 1.0));
     m.setShininess(100.0);
     setMaterial(m);
