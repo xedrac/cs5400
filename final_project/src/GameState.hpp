@@ -9,6 +9,7 @@
 #include "Camera.hpp"
 #include "Spaceship.hpp"
 #include "Projectile.hpp"
+#include "SkyBox.hpp"
 #include <vector>
 #include <list>
 #include <map>
@@ -61,6 +62,7 @@ private:
     std::list<std::shared_ptr<Projectile>>       _enemyprojectiles;
     std::list<std::shared_ptr<Projectile>>       _playerprojectiles;
 
+    std::shared_ptr<SkyBox>                      _skybox;
     int _playermovestate;
 	int _lastupdate;
     bool _running;

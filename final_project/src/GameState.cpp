@@ -16,11 +16,6 @@ using namespace std;
 GameState::GameState()
     : _playermovestate(0)
 {
-}
-
-
-void GameState::init()
-{
     _program = cs5400::make_program(cs5400::make_vertexShader("shaders/vertex.glsl"),
                                     cs5400::make_fragmentShader("shaders/fragment.glsl"));
 
@@ -32,27 +27,44 @@ void GameState::init()
     _scene.addLight(light1);
     _scene.setAmbientLight(glm::vec3(0.1, 0.1, 0.1));
 
+    _camera.setScene(&_scene);
+    _camera.setPosition(glm::vec3(0.0f, 0.0f, 1.8f));
+
+    _skybox = make_shared<SkyBox>(SkyBox(_program->getHandle(),
+                                         "textures/grimmnight-top.png",
+                                         "textures/grimmnight-bottom.png",
+                                         "textures/grimmnight-left.png",
+                                         "textures/grimmnight-right.png",
+                                         "textures/grimmnight-front.png",
+                                         "textures/grimmnight-back.png"));
+    _skybox->addToScene(_scene);
+
     shared_ptr<Mesh> bunnymesh        = loadMesh("bunny",  "models/bunny.ply");
     shared_ptr<Mesh> spacefrigatemesh = loadMesh("space_frigate",  "models/space_frigate.obj");
     shared_ptr<Mesh> spaceshipmesh    = loadMesh("spaceship",  "models/spaceship.obj");
+}
+
+
+void GameState::init()
+{
 
     int enemyrows = 4;
     int enemycols = 8;
     float enemyspeed = 0.0002;
     float enemyscale = 0.003;
     glm::vec3 enemyrotate = glm::vec3(90.0, 0.0, 90.0);
-    loadEnemyShips(spacefrigatemesh, enemyrows, enemycols, enemyspeed, enemyscale, enemyrotate);
+    loadEnemyShips(_meshes["space_frigate"], enemyrows, enemycols, enemyspeed, enemyscale, enemyrotate);
 
     _playership = make_shared<Spaceship>(Spaceship(_program->getHandle(),
-                                                   spacefrigatemesh,
+                                                   _meshes["space_frigate"],
                                                    glm::vec3(0.0f, -0.6f, 0.0f ),         // position
                                                    glm::vec3(0.004f, 0.004f, 0.004f),  // scale
                                                    glm::vec3(90.f, 0.f, -90.f),            // rotation
                                                    -1,                                    // direction
                                                    0.0004));                              // speed
     Material m;
-    m.setAmbient(glm::vec3(0.2, 0.2, 0.5));
-    m.setDiffuse(glm::vec3(0.4, 0.4, 1.0));
+    m.setAmbient(glm::vec3(0.2, 0.2, 0.2));
+    m.setDiffuse(glm::vec3(1.0, 1.0, 0.5));
     m.setSpecular(glm::vec3(0.9, 0.9, 0.9));
     m.setShininess(100.0);
 
@@ -67,8 +79,6 @@ void GameState::init()
 
     refreshTime();
 
-    _camera.setScene(&_scene);
-    _camera.setPosition(glm::vec3(0.0f, 0.0f, 1.8f));
     _camera.render();
 
 	_lastupdate = glutGet(GLUT_ELAPSED_TIME);

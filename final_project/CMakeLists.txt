@@ -22,7 +22,6 @@ include_directories(
 #link_directories(/usr/lib/x86-64/-linux-gnu/)
 
 add_executable(render
-    src/main.cpp
     src/Program.cpp
     src/BoundingBox.cpp
     src/Shader.cpp
@@ -39,6 +38,9 @@ add_executable(render
     src/Particle.cpp
     src/ParticleSystem.cpp
     src/Projectile.cpp
+    src/FlatSurface.cpp
+    src/SkyBox.cpp
+    src/main.cpp
     externals/parsers/ply/ply.c
 )
 
@@ -48,6 +50,7 @@ target_link_libraries(render
     ${GLEW_LIBRARIES}
     ${OPENGL_LIBRARIES})
 
-file(COPY shaders DESTINATION ${CMAKE_BINARY_DIR})
-file(COPY models  DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY shaders  DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY models   DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY textures DESTINATION ${CMAKE_BINARY_DIR})
 

@@ -5,6 +5,7 @@
 #include <vector>
 #include <GL/freeglut.h>
 
+
 class Texture
 {
 public:
@@ -15,11 +16,16 @@ public:
     unsigned int height()                     const { return _height; }
 
     void bindTexture();
-    GLuint textureId() const { return _textureid; }
+    GLuint textureId()                        const { return _textureid; }
+
+private:
+    bool loadUsingSDLImage(const std::string &filename);
+
 private:
     GLuint _textureid;
     int _width;
     int _height;
+    int _nchannels;
     unsigned char *_data;
 };
 

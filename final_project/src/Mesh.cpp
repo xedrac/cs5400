@@ -71,36 +71,11 @@ void Mesh::calcNormalsMWSA()
     }
 }
 
-#if 0
-// Naive method to calculate xy square around object
-void Mesh::calcBoundingBox()
-{
-	// x_min, x_max, y_min, y_max
-	glm::vec4 result = glm::vec4(1000, -1000, 1000, -1000);
-	glm::vec3* item;
-	for (size_t i=0; i<vertices.size(); i++) {
-		item = &vertices[i];
-		if (item->x < result.x)
-			result.x = item->x;
-		else if (item-> x > result.y)
-			result.y = item->x;
-		if (item->y < result.z)
-			result.z = item->y;
-		else if (item->y > result.w)
-			result.w = item->y;
-    }
-
-    _boundingbox = BoundingBox(result);
-}
-#endif
-
 
 // Find the box surronding the mesh (in model space)
 void Mesh::calcBoundingBox()
 {
     Box3D box = Box3D();
-
-    cout << "Model BoundingBox: ";    
 
     for (size_t i=0; i<vertices.size(); i++) {
         const glm::vec3 &v = vertices[i];           
@@ -113,10 +88,6 @@ void Mesh::calcBoundingBox()
         if      (v.z < box.z0) box.z0 = v.z;
         else if (v.z > box.z1) box.z1 = v.z;
     }
-
-    cout << "(" << box.x0 << "," << box.x1 << ") "
-         << "(" << box.y0 << "," << box.y1 << ") "
-         << "(" << box.z0 << "," << box.z1 << ")\n";
 
     _boundingbox = BoundingBox(box);
 }

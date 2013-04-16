@@ -23,7 +23,7 @@ RenderedObject::RenderedObject(GLuint program,
       _scale(scale),
       _visible(true),
       //_showbounds(false),
-      _texture("../textures/mycheckered_darkest.png") // TODO: remove this in the future
+      _texture(nullptr)
 {
     setModelMatrix(glm::mat4(1.0));
 
@@ -56,6 +56,17 @@ RenderedObject::RenderedObject(GLuint program,
     calculateModelMatrix();
 }
 
+
+void RenderedObject::setMaterial(const Material &m)
+{
+    _material = m;
+}
+
+void RenderedObject::setTexture(const string &texturefile)
+{
+    _texture = make_shared<Texture>(texturefile);
+}
+
 // Store the texture coordinates in a GPU buffer
 // Currently we fake the coordinates with the 
 // vertex data since PLY files don't provide them
@@ -66,8 +77,8 @@ void RenderedObject::storeTextureCoords()
     vector<GLfloat> uvcoords;
     for (size_t k=0; k<verts.size(); k++) {
         const glm::vec3 &v = verts[k];
-        uvcoords.push_back(v.x*32);
-        uvcoords.push_back(v.y*32);
+        uvcoords.push_back((v.x + 1.0) / 2.0);
+        uvcoords.push_back((v.y + 1.0) / 2.0);
     }   
 
     glBindBuffer(GL_ARRAY_BUFFER, _gluvbuffer);
@@ -203,7 +214,8 @@ void RenderedObject::render(GLuint modelmatrixid, GLuint modelinvtranspmatrixid)
     if (!_visible)
         return;
 
-    _texture.bindTexture();
+    if (_texture)
+        _texture->bindTexture();
 
     glUniformMatrix4fv(modelmatrixid, 1, GL_FALSE, glm::value_ptr(_modelmatrix));
     glUniformMatrix3fv(modelinvtranspmatrixid, 1, GL_FALSE, glm::value_ptr(_modelinvtranspmatrix));
@@ -217,6 +229,12 @@ void RenderedObject::render(GLuint modelmatrixid, GLuint modelinvtranspmatrixid)
     glUniform4f(_glambient,  ambient.r,  ambient.g,  ambient.b,  ambient.w);
     glUniform4f(_gldiffuse,  diffuse.r,  diffuse.g,  diffuse.b,  ambient.w);
     glUniform4f(_glspecular, specular.r, specular.g, specular.b, ambient.w);
+
+    if (_texture) {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, _texture->textureId());
+        glUniform1i(_gltexturesampler, 0);
+    }
 
     //if (_showbounds)
     //    storePoints();
@@ -234,9 +252,6 @@ void RenderedObject::render(GLuint modelmatrixid, GLuint modelinvtranspmatrixid)
     glBindBuffer(GL_ARRAY_BUFFER, _gluvbuffer);
     glVertexAttribPointer(_gluvattrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, _texture.textureId());
-    glUniform1i(_gltexturesampler, 0);
 
     glDrawElements(GL_TRIANGLES, _mesh->faces.size()*3, GL_UNSIGNED_INT, 0);
 

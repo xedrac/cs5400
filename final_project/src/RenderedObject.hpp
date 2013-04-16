@@ -1,6 +1,7 @@
 #ifndef RENDEREDOBJECT_HPP
 #define RENDEREDOBJECT_HPP
 
+#include <GL/glew.h>
 #include <memory>
 #include <vector>
 #include "glm/glm.hpp"
@@ -46,7 +47,7 @@ public:
     glm::vec3 getScale()                const { return _scale;       }
     bool      getVisible()              const { return _visible;     }
     Material  getMaterial()             const { return _material;    }
-    Texture   getTexture()              const { return _texture;     }
+    std::shared_ptr<Texture> getTexture() const { return _texture;     }
 
     // rotate/translate/scale the object
     void rotate(glm::vec3 axis, float theta);
@@ -56,8 +57,8 @@ public:
     void setId(objectid_t id)             { _id = id;            }
     void setModelMatrix(glm::mat4 matrix) { _modelmatrix = matrix;
                                             _modelinvtranspmatrix = glm::inverseTranspose(glm::mat3(matrix)); }
-    void setMaterial(const Material &m)   { _material = m;       }
-    void setTexture (const Texture &t)    { _texture  = t;       }
+    void setMaterial(const Material &m);
+    void setTexture (const std::string &texturefile);
     void setVisible (bool visible)        { _visible  = visible; }
 
     // Render the object
@@ -115,7 +116,7 @@ private:
     GLuint _glspecular;
 
     Material _material;
-    Texture _texture;
+    std::shared_ptr<Texture> _texture;
 };
 
 
