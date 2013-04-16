@@ -2,17 +2,23 @@
 #include "glm/gtc/matrix_inverse.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
-ParticleSystem::ParticleSystem(GLuint program, int size, GLfloat particlesize, glm::vec3 startposition) : _size(size)
+ParticleSystem::ParticleSystem(GLuint program, ParticleSystemType type, GLfloat particlesize, glm::vec3 startposition)
 {
-    for (int i = 0; i < _size; i++)
+    if (type == ParticleSystemType::Explosion)
     {
-        float randcolor = ((float)rand()/RAND_MAX) / 3.0;
-        Particle p(glm::vec4(1.0, randcolor, 0.0, 1.0),                     // color
-                   startposition,                                           // position
-                   glm::vec3((0.0005 * ((float)rand()/RAND_MAX)) - 0.00025, // velocity
-                             (0.0005 * ((float)rand()/RAND_MAX)) - 0.00025,
-                             (0.0005 * ((float)rand()/RAND_MAX)) - 0.00025));
-        _particles.push_back(p);
+        _size = 250;
+        _runtime = 1000.0;
+
+        for (int i = 0; i < _size; i++)
+        {
+            float randcolor = ((float)rand()/RAND_MAX) / 3.0;
+            Particle p(glm::vec4(1.0, randcolor, 0.0, 1.0),                     // color
+                       startposition,                                           // position
+                       glm::vec3((0.0005 * ((float)rand()/RAND_MAX)) - 0.00025, // velocity
+                                 (0.0005 * ((float)rand()/RAND_MAX)) - 0.00025,
+                                 (0.0005 * ((float)rand()/RAND_MAX)) - 0.00025));
+            _particles.push_back(p);
+        }
     }
 
     _particleprogram = program;
@@ -25,7 +31,6 @@ ParticleSystem::ParticleSystem(GLuint program, int size, GLfloat particlesize, g
     _glcolorattrib    = glGetAttribLocation (program, "vColor");
 
     _totalelapsed = 0;
-    _runtime = 1000.0;
 }
 
 // Render the system

@@ -415,7 +415,7 @@ void GameState::loadEnemyShips(shared_ptr<Mesh> mesh, int enemyrows, int enemyco
 
 void GameState::makeExplosion(glm::vec3 position)
 {
-    std::shared_ptr<ParticleSystem> ps = make_shared<ParticleSystem>(ParticleSystem(_programParticles->getHandle(), 250, 5, position));
+    std::shared_ptr<ParticleSystem> ps = make_shared<ParticleSystem>(ParticleSystem(_programParticles->getHandle(), ParticleSystemType::Explosion, 5, position));
     _particlesystems.push_back(ps);
     _scene.insertParticleSystem(ps);
 }

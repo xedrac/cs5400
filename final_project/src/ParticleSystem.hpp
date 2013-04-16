@@ -7,10 +7,17 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
+enum ParticleSystemType
+{
+	Explosion = 0,
+	EnemyExhaust = 1,
+	PlayerExhaust = 2
+};
+
 class ParticleSystem
 {
 public:
-    ParticleSystem(GLuint program, int size, GLfloat particleSize, glm::vec3 startposition);
+    ParticleSystem(GLuint program, ParticleSystemType type, GLfloat particleSize, glm::vec3 startposition);
     void render(GLuint modelmatrixid, GLuint viewmatrixid, GLuint projectionmatrixid, const glm::mat4 &viewmatrix, const glm::mat4 &projectionmatrix);
     bool update(int elapsedms); // return false if system has finished runtime
 
@@ -26,6 +33,7 @@ private:
     GLfloat _particlesize;
     int _totalelapsed;
     float _runtime;
+    ParticleSystemType _type;
 
     GLint _glvertexattrib;
     GLint _glcolorattrib;
