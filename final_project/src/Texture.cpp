@@ -5,6 +5,8 @@
 
 using namespace std;
 
+#define GL_CLAMP_TO_EDGE 0x812F // for Microsoft header
+
 Texture::Texture(const string &filename)
 {
     _data = stbi_load(filename.c_str(), &_width, &_height, &_nchannels, 0);

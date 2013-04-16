@@ -31,6 +31,7 @@ ParticleSystem::ParticleSystem(GLuint program, ParticleSystemType type, GLfloat 
     _glcolorattrib    = glGetAttribLocation (program, "vColor");
 
     _totalelapsed = 0;
+    _visible = true;
 }
 
 // Render the system
