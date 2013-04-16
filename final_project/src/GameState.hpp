@@ -55,6 +55,7 @@ private:
 
     std::map<std::string, std::shared_ptr<Mesh>> _meshes;
     std::shared_ptr<cs5400::Program>             _program;
+    std::shared_ptr<cs5400::Program>             _programParticles;
     std::vector<std::shared_ptr<Spaceship>>      _enemyships;
     std::shared_ptr<Spaceship>                   _playership;
     std::vector<std::shared_ptr<ParticleSystem>> _particlesystems;

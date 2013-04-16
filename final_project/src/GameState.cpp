@@ -24,6 +24,9 @@ void GameState::init()
     _program = cs5400::make_program(cs5400::make_vertexShader("shaders/vertex.glsl"),
                                     cs5400::make_fragmentShader("shaders/fragment.glsl"));
 
+    _programParticles = cs5400::make_program(cs5400::make_vertexShader("shaders/vertex_particle.glsl"),
+                                             cs5400::make_fragmentShader("shaders/fragment_particle.glsl"));
+
     Light light1(glm::vec3(0.0, 1.0, 1.5),  // position
                  glm::vec3(0.9, 1.0, 0.8),  // diffuse
                  glm::vec3(1.0, 1.0, 1.0)); // specular
@@ -61,7 +64,7 @@ void GameState::init()
     _scene.insertObject(_playership);
 
     // test particle system
-    std::shared_ptr<ParticleSystem> ps = make_shared<ParticleSystem>(ParticleSystem(10));
+    std::shared_ptr<ParticleSystem> ps = make_shared<ParticleSystem>(ParticleSystem(_programParticles->getHandle(), 250, 5, glm::vec3(0.0)));
     _particlesystems.push_back(ps);
     _scene.insertParticleSystem(ps);
 
@@ -338,6 +341,18 @@ void GameState::updateObjectState()
 		//_lights[0].setDiffuse(glm::vec3(0.9, 1.0, 0.8));
     }
 #endif
+
+    // update particle systems
+    for (size_t i=0; i<_particlesystems.size(); i++) {
+        if (!_particlesystems[i]->update(elapsedms)) {
+            _particlesystems[i]->hide(); // hide for now, would be best to delete somehow
+
+            // test particle system
+            std::shared_ptr<ParticleSystem> ps = make_shared<ParticleSystem>(ParticleSystem(_programParticles->getHandle(), 250, 5, glm::vec3(0.0)));
+            _particlesystems.push_back(ps);
+            _scene.insertParticleSystem(ps);
+        }
+    }
 
 	// set new last update time
 	_lastupdate = glutGet(GLUT_ELAPSED_TIME);

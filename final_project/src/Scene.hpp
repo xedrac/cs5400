@@ -52,6 +52,7 @@ public:
 
 private:
     std::shared_ptr<cs5400::Program> _program;
+    std::shared_ptr<cs5400::Program> _programParticles;
     
     // All objects to be rendered in the scene
     std::vector<object_t> _objects;
@@ -65,6 +66,10 @@ private:
     GLuint _glProjectionMatrix;
     GLuint _glModelInvTranspMatrix;
     GLuint _glViewInverseMatrix;
+
+    GLuint _glModelMatrixParticles;
+    GLuint _glViewMatrixParticles;
+    GLuint _glProjectionMatrixParticles;
 
     GLuint _glLightPosition;
     GLuint _glLightAmbient;
