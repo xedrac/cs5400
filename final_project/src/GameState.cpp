@@ -173,7 +173,7 @@ void GameState::onMouseButton(int button, int state, int, int)
     switch (button) {
     case GLUT_LEFT_BUTTON:
         if (state == GLUT_DOWN && !_gameover)
-            fireProjectile(_playership->getPosition(), glm::vec3(0.0f, 1.0f, 0.0f), 0.05, 0.001, false);
+            fireProjectile(_playership->getPosition(), glm::vec3(0.0f, 1.0f, 0.0f), 0.1, 0.001, false);
         break;
 
     case GLUT_RIGHT_BUTTON:
@@ -241,7 +241,10 @@ void GameState::updateObjectState()
             enemy->setTimeToNextProjectile(_rng.genUniformInt());
         } else if (ms > enemy->getTimeToNextProjectile()) {
             fireProjectile(enemy->getPosition(), glm::vec3(0.0f, -1.0f, 0.0f), 0.1, 0.0003, true);
-            enemy->setTimeToNextProjectile(_rng.genUniformInt());
+
+            float factor = _enemyships.size() / 32.0;
+            int delta = (int)(_rng.genUniformInt() * factor);
+            enemy->setTimeToNextProjectile((delta<0? 100: delta));
         }
         //createEffect(ParticleSystemType::EnemyExhaust, _enemyships[i]->getPosition()); // bad performance
     }
