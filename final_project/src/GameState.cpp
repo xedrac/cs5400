@@ -44,12 +44,12 @@ GameState::GameState()
     shared_ptr<Mesh> spacefrigatemesh = loadMesh("space_frigate", "models/space_frigate.obj");
     shared_ptr<Mesh> spaceshipmesh    = loadMesh("spaceship",     "models/spaceship.obj");
     shared_ptr<Mesh> missilemesh      = loadMesh("missile",       "models/cylinder.ply");
+
 }
 
 
 void GameState::init()
 {
-
     int enemyrows = 4;
     int enemycols = 8;
     float enemyspeed = 0.0002;
@@ -82,6 +82,26 @@ void GameState::init()
 	_lastupdate = glutGet(GLUT_ELAPSED_TIME);
     _gameover = false;
 }
+
+
+void GameState::resetGame()
+{
+    for (size_t i=0; i<_enemyships.size(); i++)
+        _scene.removeObject(_enemyships[i]);
+    for (auto itr=_enemyprojectiles.begin(); itr != _enemyprojectiles.end(); itr++)
+        _scene.removeObject(*itr);
+    for (auto itr=_playerprojectiles.begin(); itr != _playerprojectiles.end(); itr++)
+        _scene.removeObject(*itr);
+
+    _scene.removeObject(_playership);    
+
+    _enemyships.clear();
+    _enemyprojectiles.clear();
+    _playerprojectiles.clear();
+
+    init();
+}
+
 
 
 // This is our main event loop
@@ -133,16 +153,17 @@ void GameState::onKey(unsigned char key, int, int)
     case ',': _playermovestate |= MoveStateUp;    break;
 
     case 'a': _playermovestate |= MoveStateLeft;  break;
+
     case 's':  // fall through
-
     case 'o': _playermovestate |= MoveStateDown;  break;
+
     case 'd':  // fall through
-
     case 'e': _playermovestate |= MoveStateRight; break;
-    case ' ':
-        break;
 
+    case ' ':                                     break;
     case 'f': glutFullScreenToggle();             break;
+    case 'r': resetGame();                        break;
+
     default:
         break;
     }

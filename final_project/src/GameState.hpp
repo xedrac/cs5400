@@ -23,6 +23,7 @@ public:
     GameState();
 
     void init();
+    void resetGame();
     void gameLoop();
 
     // Singleton instance of our gamestate
