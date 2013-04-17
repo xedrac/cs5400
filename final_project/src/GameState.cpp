@@ -15,7 +15,8 @@ using namespace std;
 
 GameState::GameState()
     : _rng(0, 10000),
-      _playermovestate(0)
+      _playermovestate(0),
+      _freecamera(false)
 {
     Light light1(glm::vec3(0.0, 1.0, 1.5),  // position
                  glm::vec3(0.9, 1.0, 0.8),  // diffuse
@@ -77,6 +78,7 @@ void GameState::init()
     refreshTime();
 
     _camera.setPosition(glm::vec3(0.0f, 0.0f, 1.8f));
+    _camera.lookAt(glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     _camera.render();
 
 	_lastupdate = glutGet(GLUT_ELAPSED_TIME);
@@ -108,6 +110,8 @@ void GameState::resetGame()
 void GameState::gameLoop()
 {
     _running = true;
+    _windowwidth  = glutGet(GLUT_WINDOW_WIDTH); 
+    _windowheight = glutGet(GLUT_WINDOW_HEIGHT); 
 
     while (_running) {
         glutMainLoopEvent();  // process any glut events that have queued up
@@ -142,6 +146,8 @@ void GameState::onKeyRelease(unsigned char key, int, int)
 
     case 'd':  // fall through
     case 'e': _playermovestate &= ~MoveStateRight; break;
+
+    case 'c': _freecamera = false;                 break;
     };
 }
 
@@ -160,11 +166,16 @@ void GameState::onKey(unsigned char key, int, int)
     case 'd':  // fall through
     case 'e': _playermovestate |= MoveStateRight; break;
 
-    case ' ':                                     break;
-    case 'f': glutFullScreenToggle();             break;
+    case 'f':
+         glutFullScreenToggle();
+        _windowwidth  = glutGet(GLUT_WINDOW_WIDTH); 
+        _windowheight = glutGet(GLUT_WINDOW_HEIGHT); 
+        break;
+
     case 'r': resetGame();                        break;
 
-    case 27:  _running = false;                   break;
+    case  27: _running = false;                   break;
+    case 'c': _freecamera = true;                 break;
 
     default:
         break;
@@ -191,9 +202,7 @@ void GameState::onSpecialKey(int key, int, int)
 }
 
 
-
-
-void GameState::onMouse(int button, int state, int x, int y)
+void GameState::onMouseButton(int button, int state, int x, int y)
 {
     switch (button) {
     case GLUT_LEFT_BUTTON:
@@ -213,6 +222,21 @@ void GameState::onMouse(int button, int state, int x, int y)
 
     case 3:  _camera.moveZ(0.02);  break;
     case 4:  _camera.moveZ(-0.02); break;
+    }
+}
+
+
+void GameState::onMousePassiveMotion(int x, int y)
+{
+    if (_freecamera) {
+        float xp = x / (float)_windowwidth;
+        float yp = y / (float)_windowheight;
+
+        float xangle = 1 - (180.0 * xp - 90.0);
+        float yangle = 1 - (176.0 * yp - 88.0);
+
+        _camera.setPitchFromLook(glm::vec3(0.0, 0.0, -1.0), yangle);
+        _camera.setYawFromLook(_camera.getLookDirection(), xangle);
     }
 }
 

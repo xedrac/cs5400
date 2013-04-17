@@ -10,7 +10,8 @@ using namespace std;
 void onKey(unsigned char key, int x, int y)         { GameState::getInstance().onKey(key, x, y);             }
 void onKeyRelease(unsigned char key, int x, int y)  { GameState::getInstance().onKeyRelease(key, x, y);      }
 void onSpecialKey(int key, int x, int y)            { GameState::getInstance().onSpecialKey(key, x, y);      }
-void onMouse(int btn, int state, int x, int y)      { GameState::getInstance().onMouse(btn, state, x, y);    }
+void onMouseButton(int btn, int state, int x, int y){ GameState::getInstance().onMouseButton(btn, state, x, y); }
+void onMousePassiveMotion(int x, int y)             { GameState::getInstance().onMousePassiveMotion(x, y);   }
 
 
  
@@ -19,7 +20,9 @@ int main(int argc, char **argv)
     // Glut-related initialising functions
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA|GLUT_DOUBLE|GLUT_DEPTH/*|GLUT_MULTISAMPLE*/);
-    glutInitWindowSize(1680, 1050);
+    int screenwidth = glutGet(GLUT_SCREEN_WIDTH);
+    int screenheight = glutGet(GLUT_SCREEN_HEIGHT);
+    glutInitWindowSize(screenwidth, screenheight);
     glutCreateWindow("final project");
 
     // Extension wrangler initialising
@@ -36,7 +39,8 @@ int main(int argc, char **argv)
         glutKeyboardFunc(onKey);
         glutKeyboardUpFunc(onKeyRelease);
         glutSpecialFunc(onSpecialKey);
-        glutMouseFunc(onMouse);
+        glutMouseFunc(onMouseButton);
+        glutPassiveMotionFunc(onMousePassiveMotion);
         glutIgnoreKeyRepeat(1);
         glutFullScreen();
         glutSetCursor(GLUT_CURSOR_NONE);

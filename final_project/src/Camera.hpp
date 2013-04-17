@@ -16,9 +16,13 @@ public:
     // resets the camera to defaults
     void reset();
 
+    const glm::vec3 &getLookDirection() const { return _lookdirection; }
+
     // Functions to move/direct the camera
     void setPosition(glm::vec3 pos);
     void lookAt(glm::vec3 look, glm::vec3 up);
+    void setYawFromLook(glm::vec3 look, float angle);
+    void setPitchFromLook(glm::vec3 look, float angle);
 
     void moveX(float units);
     void moveY(float units);

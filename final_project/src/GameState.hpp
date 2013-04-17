@@ -33,7 +33,8 @@ public:
     void onKey(unsigned char key, int x, int y);
     void onKeyRelease(unsigned char key, int x, int y);
     void onSpecialKey(int key, int x, int y);
-    void onMouse(int button, int state, int x, int y);
+    void onMouseButton(int button, int state, int x, int y);
+    void onMousePassiveMotion(int x, int y);
 
 private:
     std::shared_ptr<Mesh> loadMesh(const std::string &name, const std::string &filename);
@@ -70,8 +71,13 @@ private:
     std::shared_ptr<SkyBox>                      _skybox;
     int _playermovestate;
 	int _lastupdate;
+    bool _freecamera;
     bool _running;
     bool _gameover;
+
+    int _windowwidth;
+    int _windowheight;
 };
 
 #endif
+

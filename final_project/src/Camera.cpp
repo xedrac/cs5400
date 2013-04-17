@@ -56,6 +56,37 @@ void Camera::lookAt(glm::vec3 look, glm::vec3 up)
     _updirection   = glm::normalize(up);
 }
 
+void Camera::setYawFromLook(glm::vec3 look, float angle)
+{
+    glm::vec4 look4(look, 0.0);
+    glm::mat4 matrix = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0, 1.0, 0.0)/*_updirection*/);
+    look4 = matrix * look4;
+    //lookAt(look4.xyz(), _updirection);
+    _lookdirection = look4.xyz();
+}
+
+
+void Camera::setPitchFromLook(glm::vec3 look, float angle)
+{
+    glm::vec4 up(glm::vec3(0.0, 1.0, 0.0), 0.0);
+    glm::vec4 look4(look, 0.0);
+
+    // Move to the origin
+    glm::mat4 matrix = glm::translate(glm::mat4(1.0f), -_position);
+    // Pitch the camera
+    matrix = glm::rotate(matrix, angle, glm::cross(look, glm::vec3(0.0, 1.0, 0.0)));
+    // Move it back to it's original spot
+    matrix = glm::translate(matrix, _position);
+    
+    look4 = matrix * look4;
+    up    = matrix * up;
+
+    //lookAt(look4.xyz(), up.xyz());
+
+    _lookdirection = look4.xyz();
+    _updirection   = up.xyz();
+}
+
 
 void Camera::moveX(float units)
 {
