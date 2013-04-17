@@ -39,6 +39,7 @@ int main(int argc, char **argv)
         glutMouseFunc(onMouse);
         glutIgnoreKeyRepeat(1);
         glutFullScreen();
+        glutSetCursor(GLUT_CURSOR_NONE);
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
