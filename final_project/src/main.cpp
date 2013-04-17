@@ -10,7 +10,7 @@ using namespace std;
 void onKey(unsigned char key, int x, int y)         { GameState::getInstance().onKey(key, x, y);             }
 void onKeyRelease(unsigned char key, int x, int y)  { GameState::getInstance().onKeyRelease(key, x, y);      }
 void onSpecialKey(int key, int x, int y)            { GameState::getInstance().onSpecialKey(key, x, y);      }
-void onMouseButton(int btn, int state, int x, int y){ GameState::getInstance().onMouseButton(btn, state, x, y); }
+void onMouse(int btn, int state, int x, int y)      { GameState::getInstance().onMouse(btn, state, x, y);    }
 
 
  
@@ -36,8 +36,10 @@ int main(int argc, char **argv)
         glutKeyboardFunc(onKey);
         glutKeyboardUpFunc(onKeyRelease);
         glutSpecialFunc(onSpecialKey);
-        glutMouseFunc(onMouseButton);
+        glutMouseFunc(onMouse);
         glutIgnoreKeyRepeat(1);
+        glutFullScreen();
+        glutSetCursor(GLUT_CURSOR_NONE);
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
