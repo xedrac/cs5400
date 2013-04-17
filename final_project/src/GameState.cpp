@@ -6,6 +6,7 @@
 #include "Program.hpp"
 #include <assert.h>
 #include <iostream>
+#include <unistd.h>
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/matrix_inverse.hpp"
@@ -233,6 +234,10 @@ void GameState::updateObjectState()
 	bool keepDirection = true;
     for (size_t i=0; i<_enemyships.size(); i++) {
         auto enemy = _enemyships[i];
+        float factor = _enemyships.size() / 32.0;
+        float speed  = 0.0001 + 0.0005 * (1.0-factor);
+        enemy->setSpeed(speed);
+
         if (enemy->update(elapsedms) == false)
             keepDirection = false;
 
@@ -242,7 +247,6 @@ void GameState::updateObjectState()
         } else if (ms > enemy->getTimeToNextProjectile()) {
             fireProjectile(enemy->getPosition(), glm::vec3(0.0f, -1.0f, 0.0f), 0.1, 0.0003, true);
 
-            float factor = _enemyships.size() / 32.0;
             int delta = (int)(_rng.genUniformInt() * factor);
             enemy->setTimeToNextProjectile((delta<0? 100: delta));
         }
