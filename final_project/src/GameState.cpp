@@ -141,6 +141,8 @@ void GameState::onKey(unsigned char key, int, int)
     case 'e': _playermovestate |= MoveStateRight; break;
     case ' ':
         break;
+
+    case 'f': glutFullScreenToggle();             break;
     default:
         break;
     }
@@ -168,7 +170,7 @@ void GameState::onSpecialKey(int key, int, int)
 
 
 
-void GameState::onMouseButton(int button, int state, int, int)
+void GameState::onMouse(int button, int state, int x, int y)
 {
     switch (button) {
     case GLUT_LEFT_BUTTON:
