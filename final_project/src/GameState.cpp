@@ -14,9 +14,9 @@
 using namespace std;
 
 GameState::GameState()
-    : _playermovestate(0)
+    : _rng(0, 10000),
+      _playermovestate(0)
 {
-
     Light light1(glm::vec3(0.0, 1.0, 1.5),  // position
                  glm::vec3(0.9, 1.0, 0.8),  // diffuse
                  glm::vec3(1.0, 1.0, 1.0)); // specular
@@ -40,10 +40,10 @@ GameState::GameState()
                                          "textures/grimmnight-back.png"));
     _skybox->addToScene(_scene);
 
-    shared_ptr<Mesh> bunnymesh        = loadMesh("bunny",  "models/bunny.ply");
-    shared_ptr<Mesh> spacefrigatemesh = loadMesh("space_frigate",  "models/space_frigate.obj");
-    shared_ptr<Mesh> spaceshipmesh    = loadMesh("spaceship",  "models/spaceship.obj");
-
+    shared_ptr<Mesh> bunnymesh        = loadMesh("bunny",         "models/bunny.ply");
+    shared_ptr<Mesh> spacefrigatemesh = loadMesh("space_frigate", "models/space_frigate.obj");
+    shared_ptr<Mesh> spaceshipmesh    = loadMesh("spaceship",     "models/spaceship.obj");
+    shared_ptr<Mesh> missilemesh      = loadMesh("missile",       "models/cylinder.ply");
 }
 
 
@@ -59,11 +59,12 @@ void GameState::init()
 
     _playership = make_shared<Spaceship>(Spaceship(_program,
                                                    _meshes["space_frigate"],
-                                                   glm::vec3(0.0f, -0.6f, 0.0f ),         // position
+                                                   glm::vec3(0.0f, -0.6f, 0.0f ),      // position
                                                    glm::vec3(0.004f, 0.004f, 0.004f),  // scale
-                                                   glm::vec3(90.f, 0.f, -90.f),            // rotation
-                                                   -1,                                    // direction
-                                                   0.0004));                              // speed
+                                                   glm::vec3(90.f, 0.f, -90.f),        // rotation
+                                                   -1,                                 // direction
+                                                   0.0004));                           // speed
+                                                    
     Material m;
     m.setAmbient(glm::vec3(0.2, 0.2, 0.5));
     m.setDiffuse(glm::vec3(0.4, 0.4, 0.9));
@@ -93,8 +94,7 @@ void GameState::gameLoop()
         updateObjectState();  // move game objects as appropriate
 
         if (_gameover) {
-            cout << "Game Over\n";
-            return;
+            //cout << "Game Over\n";
         }
 
         // Clear the background as black
@@ -166,39 +166,24 @@ void GameState::onSpecialKey(int key, int, int)
 }
 
 
-void GameState::fireProjectile(glm::vec3 position, glm::vec3 direction, float scale, float speed, bool fromenemy)
-{
-    shared_ptr<Projectile> p = make_shared<Projectile>(Projectile(_program,
-                                                                  _meshes["bunny"],
-                                                                  position,
-                                                                  glm::vec3(scale, scale, scale),
-                                                                  glm::vec3(1.0f),           
-                                                                  direction,
-                                                                  speed));
-    if (fromenemy) _enemyprojectiles.push_back(p);
-    else           _playerprojectiles.push_back(p);
-
-    p->setId(_scene.getNewObjectId());
-    _scene.insertObject(p);
-}
 
 
 void GameState::onMouseButton(int button, int state, int, int)
 {
     switch (button) {
     case GLUT_LEFT_BUTTON:
-        if (state == GLUT_DOWN)
-            fireProjectile(_playership->getPosition(), glm::vec3(0.0f, 1.0f, 0.0f), 0.1, 0.001, false);
+        if (state == GLUT_DOWN && !_gameover)
+            fireProjectile(_playership->getPosition(), glm::vec3(0.0f, 1.0f, 0.0f), 0.05, 0.001, false);
         break;
 
     case GLUT_RIGHT_BUTTON:
-        if (state == GLUT_DOWN)
-            fireProjectile(_playership->getPosition(), glm::vec3(0.0f, 1.0f, 0.0f), 0.5, 0.001, false);
+        if (state == GLUT_DOWN && !_gameover)
+           fireProjectile(_playership->getPosition(), glm::vec3(0.0f, 1.0f, 0.0f), 0.2, 0.001, false);
         break;
 
     case GLUT_MIDDLE_BUTTON:
-        if (state == GLUT_DOWN)
-            fireProjectile(_playership->getPosition(), glm::vec3(0.0f, 1.0f, 0.0f), 1.5, 0.001, false);
+        if (state == GLUT_DOWN && !_gameover)
+            fireProjectile(_playership->getPosition(), glm::vec3(0.0f, 1.0f, 0.0f), 0.5, 0.001, false);
         break;
 
     case 3:  _camera.moveZ(0.02);  break;
@@ -245,10 +230,19 @@ void GameState::updateObjectState()
 
 	// update all objects' state.  If one enemy changes direction,
     // make all enemies change direction (space invaders!)
+    // also randomly fire projectiles from enemies
 	bool keepDirection = true;
     for (size_t i=0; i<_enemyships.size(); i++) {
-        if (_enemyships[i]->update(elapsedms) == false) {
+        auto enemy = _enemyships[i];
+        if (enemy->update(elapsedms) == false)
             keepDirection = false;
+
+        int ms = enemy->getTimeSinceLastProjectile();
+        if (ms < 0) {
+            enemy->setTimeToNextProjectile(_rng.genUniformInt());
+        } else if (ms > enemy->getTimeToNextProjectile()) {
+            fireProjectile(enemy->getPosition(), glm::vec3(0.0f, -1.0f, 0.0f), 0.1, 0.0003, true);
+            enemy->setTimeToNextProjectile(_rng.genUniformInt());
         }
     }
 
@@ -259,7 +253,7 @@ void GameState::updateObjectState()
 
     _playership->update(elapsedms);
 
-    // Update position of projectiles and check for collisions with player
+    // Update position of enemy projectiles and check for collisions with player
     auto epp = _enemyprojectiles.begin();
     while (epp != _enemyprojectiles.end()) {
         shared_ptr<Projectile> projectile = *epp;
@@ -272,8 +266,13 @@ void GameState::updateObjectState()
         }
 
         // GAME OVER
+        makeExplosion(_playership->getPosition());
         _scene.removeObject(_playership);
+        _scene.removeObject(projectile);
         epp = _enemyprojectiles.erase(epp);
+
+        // Hack!  Move him out of the way so enemy projectiles don't keep colliding
+        _playership->translate(glm::vec3(10,0,0));
         _gameover = true;
         break;
     }
@@ -319,18 +318,11 @@ void GameState::updateObjectState()
 
 
     // check if player ship collides with enemy ship
-    // bool collision = false;
+    // turn the enemy red if we touch
     Box3D box = _playership->getBoundingBox().getBounds();
-    //cout << "Player BoundingBox: (" << box.x0 << "," << box.x1 << ") "
-    //                         << "(" << box.y0 << "," << box.y1 << ") "
-    //                         << "(" << box.z0 << "," << box.z1 << ")\n";
     for (size_t i=0; i<_enemyships.size(); i++) {
         box = _enemyships[i]->getBoundingBox().getBounds();
         if (_playership->intersects(_enemyships[i])) {
-            //cout << "Enemy[" << i << "] BoundingBox: " << "(" << box.x0 << "," << box.x1 << ") "
-            //                                           << "(" << box.y0 << "," << box.y1 << ") "
-            //                                           << "(" << box.z0 << "," << box.z1 << ")\n";
-            //cout << "player intersected enemy " << i << endl;
             Material m;
             m.setAmbient(glm::vec3(0.3, 0.2, 0.2));
             m.setDiffuse(glm::vec3(0.8, 0.3, 0.3));
@@ -339,9 +331,6 @@ void GameState::updateObjectState()
             _enemyships[i]->setMaterial(m);
             _enemyships[i]->rotate(glm::vec3(0, 0, 0), 2.0f);
         }
-
-        //collision = true;
-        //break;
 	}
 
     // update particle systems
@@ -359,18 +348,6 @@ void GameState::updateObjectState()
         ppp = _particlesystems.erase(ppp);
     }
 
-#if 0
-	// for demo, if we have a collision we'll change light to red, otherwise the green
-	if (collision) {
-        //TODO:  player ship dies - cause explosion
-        _scene.setAmbientLight(glm::vec3(1.0, 0.2, 0.2));
-		//_lights[0].setDiffuse(glm::vec3(1.0, 0.2, 0.2));
-	} else {
-        _scene.setAmbientLight(glm::vec3(0.9, 1.0, 0.8));
-		//_lights[0].setDiffuse(glm::vec3(0.9, 1.0, 0.8));
-    }
-#endif
-
 	// set new last update time
 	_lastupdate = glutGet(GLUT_ELAPSED_TIME);
 } 
@@ -381,6 +358,12 @@ void GameState::refreshTime()
 	_lastupdate = glutGet(GLUT_ELAPSED_TIME);
 }
 
+void GameState::addPlayerProjectile(shared_ptr<Projectile> p)
+{
+    p->setId(_scene.getNewObjectId()); 
+    _playerprojectiles.push_back(p);
+    _scene.insertObject(p);
+}
 
 void GameState::addEnemy(shared_ptr<Spaceship> enemy)
 {
@@ -389,7 +372,6 @@ void GameState::addEnemy(shared_ptr<Spaceship> enemy)
     _enemyships.push_back(enemy);
     _scene.insertObject(enemy);
 }
-
 
 
 void GameState::loadEnemyShips(shared_ptr<Mesh> mesh, int enemyrows, int enemycols, float speed, float scale, glm::vec3 rot)
@@ -411,11 +393,12 @@ void GameState::loadEnemyShips(shared_ptr<Mesh> mesh, int enemyrows, int enemyco
             float xpos = col*xgap - halfwidth;
             enemy = make_shared<Spaceship>(Spaceship(_program,
                                                      mesh,
-                                                     glm::vec3(xpos, ypos, 0.0f), // position
-                                                     glm::vec3(scale),            // scale
+                                                     glm::vec3(xpos, ypos, 0.0f),    // position
+                                                     glm::vec3(scale),               // scale
                                                      glm::vec3(rot.x, rot.y, rot.z), // rotation
-                                                     1,                           // direction
-                                                     speed));                     // speed
+                                                     1,                              // direction
+                                                     speed));                        // speed
+                                                     
             addEnemy(enemy);
         }
     }
@@ -433,4 +416,21 @@ void GameState::makeExhaust(glm::vec3 position)
     std::shared_ptr<ParticleSystem> ps = make_shared<ParticleSystem>(ParticleSystem(_programParticles, ParticleSystemType::PlayerExhaust, position));
     _particlesystems.push_back(ps);
     _scene.insertParticleSystem(ps);
+}
+
+
+void GameState::fireProjectile(glm::vec3 position, glm::vec3 direction, float scale, float speed, bool fromenemy)
+{
+    shared_ptr<Projectile> p = make_shared<Projectile>(Projectile(_program,
+                                                                  _meshes["missile"],
+                                                                  position,
+                                                                  glm::vec3(scale, scale, scale),
+                                                                  glm::vec3(1.0f),           
+                                                                  direction,
+                                                                  speed));
+    if (fromenemy) _enemyprojectiles.push_back(p);
+    else           _playerprojectiles.push_back(p);
+
+    p->setId(_scene.getNewObjectId());
+    _scene.insertObject(p);
 }

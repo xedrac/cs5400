@@ -1,6 +1,7 @@
 #include <vector>
 #include <GL/glew.h>
 #include "Spaceship.hpp"
+#include "RNG.hpp"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/matrix_inverse.hpp"
@@ -18,7 +19,9 @@ Spaceship::Spaceship(GLuint program,
                      float speed)
     : RenderedObject(program, mesh, position, scale, rotation),
 	  _speed(speed),
-	  _direction(direction)
+	  _direction(direction),
+      _timesincelastprojectile(-1),
+      _timetonextprojectile(0)
 {
     Material m;
     m.setAmbient(glm::vec3(0.2, 0.3, 0.2));
@@ -52,6 +55,7 @@ bool Spaceship::update(int elapsedms)
             break;
     }
 
+    _timesincelastprojectile += elapsedms;
     return keepdirection;
 }
 
@@ -61,3 +65,4 @@ void Spaceship::changeDirection()
 	// simple 0 <-> 1 for now
 	_direction = _direction ^ 1;
 }
+

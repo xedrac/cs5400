@@ -10,6 +10,7 @@
 #include "Spaceship.hpp"
 #include "Projectile.hpp"
 #include "SkyBox.hpp"
+#include "RNG.hpp"
 #include <vector>
 #include <list>
 #include <map>
@@ -37,6 +38,7 @@ private:
     std::shared_ptr<Mesh> loadMesh(const std::string &name, const std::string &filename);
     void loadEnemyShips(std::shared_ptr<Mesh> mesh, int enemyrows, int enemycols, float speed, float scale, glm::vec3 rotate);
     void addEnemy(std::shared_ptr<Spaceship> enemy);
+    void addPlayerProjectile(std::shared_ptr<Projectile> p);
 	void updateObjectState();  // update all objects in scene
 	void refreshTime();        // refresh time before starting a scene render (after models are added)
     void fireProjectile(glm::vec3 position, glm::vec3 direction, float scale, float speed, bool fromenemy);
@@ -55,6 +57,8 @@ private:
     Camera _camera;
     GLuint _program;
     GLuint _programParticles;
+
+    RNG _rng;
 
     std::map<std::string, std::shared_ptr<Mesh>> _meshes;
     std::vector<std::shared_ptr<Spaceship>>      _enemyships;

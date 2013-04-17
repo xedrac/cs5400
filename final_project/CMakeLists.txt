@@ -41,6 +41,7 @@ add_executable(render
     src/FlatSurface.cpp
     src/SkyBox.cpp
     src/main.cpp
+    src/RNG.cpp
     externals/parsers/ply/ply.c
 )
 

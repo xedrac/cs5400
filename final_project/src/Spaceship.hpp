@@ -28,9 +28,18 @@ public:
     int   getDirection() const  { return _direction; }
     void  setDirection(int dir) { _direction = dir;  }
 
+    // This is all very hackish... but we're down to the wire now
+    int getTimeSinceLastProjectile() const { return _timesincelastprojectile; }
+    int getTimeToNextProjectile() const    { return _timetonextprojectile;    }
+
+    void setTimeToNextProjectile(int ms)   { _timesincelastprojectile = 0;  _timetonextprojectile = ms;  }
+
 private:
 	float _speed;
 	int   _direction; // probably just 0 or 1 but room for expansion
+
+    int _timesincelastprojectile;
+    int _timetonextprojectile;
 };
 
 
