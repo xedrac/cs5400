@@ -174,7 +174,7 @@ void GameState::onMouseButton(int button, int state, int, int)
     switch (button) {
     case GLUT_LEFT_BUTTON:
         if (state == GLUT_DOWN && !_gameover)
-            fireProjectile(_playership->getPosition(), glm::vec3(0.0f, 1.0f, 0.0f), 0.1, 0.001, false);
+            fireProjectile(_playership->getPosition(), glm::vec3(0.0f, 1.0f, 0.0f), 0.05, 0.001, false);
         break;
 
     case GLUT_RIGHT_BUTTON:
