@@ -26,7 +26,6 @@ GameState::GameState()
     _scene.setAmbientLight(glm::vec3(0.1, 0.1, 0.1));
 
     _camera.setScene(&_scene);
-    _camera.setPosition(glm::vec3(0.0f, 0.0f, 1.8f));
 
     _program          = _scene.getProgram()->getHandle();
     _programParticles = _scene.getProgramParticles()->getHandle();
@@ -77,6 +76,7 @@ void GameState::init()
 
     refreshTime();
 
+    _camera.setPosition(glm::vec3(0.0f, 0.0f, 1.8f));
     _camera.render();
 
 	_lastupdate = glutGet(GLUT_ELAPSED_TIME);
@@ -163,6 +163,8 @@ void GameState::onKey(unsigned char key, int, int)
     case ' ':                                     break;
     case 'f': glutFullScreenToggle();             break;
     case 'r': resetGame();                        break;
+
+    case 27:  _running = false;                   break;
 
     default:
         break;
