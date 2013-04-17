@@ -141,7 +141,7 @@ void ParticleSystem::createExplosion(glm::vec3 position)
 
     for (int i = 0; i < _size; i++)
     {
-        float randcolor = ((float)rand()/RAND_MAX) / 2.0;
+        double randcolor = ((float)rand()/RAND_MAX) / 2.0;
         Particle p(glm::vec4(1.0, randcolor, 0.0, 1.0),                      // color
                     position,                                                // position
                     glm::vec3((0.0005 * ((float)rand()/RAND_MAX)) - 0.00025, // velocity
@@ -187,7 +187,6 @@ void ParticleSystem::createDeath(glm::vec3 position)
 
     for (int i = 0; i < _size; i++)
     {
-        float randcolor = ((float)rand()/RAND_MAX) / 2.0;
         Particle p(glm::vec4(0.0, 1.0, 1.0, 1.0),                      // color
                     position,                                                // position
                     glm::vec3((0.0008 * ((float)rand()/RAND_MAX)) - 0.0004, // velocity
@@ -206,7 +205,6 @@ void ParticleSystem::createDeathFollowup(glm::vec3 position)
 
     for (int i = 0; i < _size; i++)
     {
-        float randcolor = ((float)rand()/RAND_MAX) / 2.0;
         Particle p(glm::vec4(0.9, 1.0, 1.0, 1.0),                      // color
                     position,                                                // position
                     glm::vec3((0.0008 * ((float)rand()/RAND_MAX)) - 0.0004, // velocity
