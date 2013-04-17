@@ -224,9 +224,8 @@ void GameState::updateObjectState()
          MoveStateUp |
          MoveStateDown)) {
         // player moving, create exhaust
-        makeExhaust(_playership->getPosition());
+        createEffect(ParticleSystemType::PlayerExhaust, _playership->getPosition());
     }
-
 
 	// update all objects' state.  If one enemy changes direction,
     // make all enemies change direction (space invaders!)
@@ -244,6 +243,7 @@ void GameState::updateObjectState()
             fireProjectile(enemy->getPosition(), glm::vec3(0.0f, -1.0f, 0.0f), 0.1, 0.0003, true);
             enemy->setTimeToNextProjectile(_rng.genUniformInt());
         }
+        //createEffect(ParticleSystemType::EnemyExhaust, _enemyships[i]->getPosition()); // bad performance
     }
 
     if (!keepDirection) {
@@ -302,7 +302,7 @@ void GameState::updateObjectState()
             }
 
             // BOOM!  Destroy enemy ship & projectile
-            makeExplosion(enemy->getPosition());
+            createEffect(ParticleSystemType::Explosion, enemy->getPosition());
             _scene.removeObject(enemy);
             _scene.removeObject(projectile);
             
@@ -404,16 +404,9 @@ void GameState::loadEnemyShips(shared_ptr<Mesh> mesh, int enemyrows, int enemyco
     }
 }
 
-void GameState::makeExplosion(glm::vec3 position)
+void GameState::createEffect(ParticleSystemType type, glm::vec3 position)
 {
-    std::shared_ptr<ParticleSystem> ps = make_shared<ParticleSystem>(ParticleSystem(_programParticles, ParticleSystemType::Explosion, position));
-    _particlesystems.push_back(ps);
-    _scene.insertParticleSystem(ps);
-}
-
-void GameState::makeExhaust(glm::vec3 position)
-{
-    std::shared_ptr<ParticleSystem> ps = make_shared<ParticleSystem>(ParticleSystem(_programParticles, ParticleSystemType::PlayerExhaust, position));
+    std::shared_ptr<ParticleSystem> ps = make_shared<ParticleSystem>(ParticleSystem(_programParticles, type, position));
     _particlesystems.push_back(ps);
     _scene.insertParticleSystem(ps);
 }

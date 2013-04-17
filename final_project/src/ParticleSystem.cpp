@@ -11,6 +11,9 @@ ParticleSystem::ParticleSystem(GLuint program, ParticleSystemType type, glm::vec
         case ParticleSystemType::PlayerExhaust:
             createPlayerExhaust(startposition);
             break;
+        case ParticleSystemType::EnemyExhaust:
+            createEnemyExhaust(startposition);
+            break;
     }
 
     _particleprogram = program;
@@ -142,4 +145,16 @@ void ParticleSystem::createPlayerExhaust(glm::vec3 position)
                 glm::vec3(0.0));
     _particles.push_back(p1);
     _particles.push_back(p2);
+}
+
+void ParticleSystem::createEnemyExhaust(glm::vec3 position)
+{
+    _size = 1;
+    _runtime = 500.0;
+    _particlesize = 3;
+
+    Particle p(glm::vec4(0.8, 1.0, 0.8, 1.0),
+               position + glm::vec3(0.0, 0.01, 0.0),
+               glm::vec3(0.0, 0.05, 0.0));
+    _particles.push_back(p);
 }
