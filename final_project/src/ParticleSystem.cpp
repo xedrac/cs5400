@@ -100,6 +100,8 @@ bool ParticleSystem::update(int elapsedms)
                     // exhaust gets darker
                     _particles[i].addColor(glm::vec3(-percenthalf, 0.0, 0.0));
                     break;
+                default:
+                    break;
             }
         }
         glm::vec3 velocity = _particles[i].getVelocity();
