@@ -272,7 +272,8 @@ void GameState::updateObjectState()
         }
 
         // GAME OVER
-        createEffect(ParticleSystemType::Explosion, _playership->getPosition());
+        createEffect(ParticleSystemType::Death, _playership->getPosition());
+        createEffect(ParticleSystemType::DeathFollowup, _playership->getPosition());
         _scene.removeObject(_playership);
         _scene.removeObject(projectile);
         epp = _enemyprojectiles.erase(epp);

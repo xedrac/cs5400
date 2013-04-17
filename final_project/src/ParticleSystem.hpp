@@ -11,7 +11,9 @@ enum ParticleSystemType
 {
 	Explosion = 0,
 	EnemyExhaust = 1,
-	PlayerExhaust = 2
+	PlayerExhaust = 2,
+    Death = 3,
+    DeathFollowup = 4
 };
 
 class ParticleSystem
@@ -34,6 +36,7 @@ private:
     int _totalelapsed;
     float _runtime;
     ParticleSystemType _type;
+    int _delay;
 
     GLint _glvertexattrib;
     GLint _glcolorattrib;
@@ -41,6 +44,8 @@ private:
     void createExplosion(glm::vec3 position);
     void createPlayerExhaust(glm::vec3 position);
     void createEnemyExhaust(glm::vec3 position);
+    void createDeath(glm::vec3 position);
+    void createDeathFollowup(glm::vec3 position);
 };
 
 #endif

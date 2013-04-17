@@ -4,6 +4,8 @@
 
 ParticleSystem::ParticleSystem(GLuint program, ParticleSystemType type, glm::vec3 startposition)
 {
+    _delay = 0; // default
+
     switch (type) {
         case ParticleSystemType::Explosion:
             createExplosion(startposition);
@@ -13,6 +15,14 @@ ParticleSystem::ParticleSystem(GLuint program, ParticleSystemType type, glm::vec
             break;
         case ParticleSystemType::EnemyExhaust:
             createEnemyExhaust(startposition);
+            break;
+        case ParticleSystemType::Death:
+            createDeath(startposition);
+            break;
+        case ParticleSystemType::DeathFollowup:
+            createDeathFollowup(startposition);
+            break;
+        default:
             break;
     }
 
@@ -81,6 +91,11 @@ bool ParticleSystem::update(int elapsedms)
     if (!_visible)
         return true;
 
+    if (_delay > 0) {
+        _delay -= elapsedms;
+        return true;
+    }
+
     float halftime = _runtime / 2;
     float percenthalf = 0;
 
@@ -100,6 +115,9 @@ bool ParticleSystem::update(int elapsedms)
                     // exhaust gets darker
                     _particles[i].addColor(glm::vec3(-percenthalf, 0.0, 0.0));
                     break;
+                case ParticleSystemType::DeathFollowup:
+                    // death gets darker quickly
+                    _particles[i].addColor(glm::vec3(-percenthalf*2, 0.0, 0.0));
                 default:
                     break;
             }
@@ -127,8 +145,8 @@ void ParticleSystem::createExplosion(glm::vec3 position)
         Particle p(glm::vec4(1.0, randcolor, 0.0, 1.0),                      // color
                     position,                                                // position
                     glm::vec3((0.0005 * ((float)rand()/RAND_MAX)) - 0.00025, // velocity
-                                (0.0005 * ((float)rand()/RAND_MAX)) - 0.00025,
-                                (0.0005 * ((float)rand()/RAND_MAX)) - 0.00025));
+                              (0.0005 * ((float)rand()/RAND_MAX)) - 0.00025,
+                              (0.0005 * ((float)rand()/RAND_MAX)) - 0.00025));
         _particles.push_back(p);
     }
 }
@@ -159,4 +177,41 @@ void ParticleSystem::createEnemyExhaust(glm::vec3 position)
                position + glm::vec3(0.0, 0.01, 0.0),
                glm::vec3(0.0, 0.05, 0.0));
     _particles.push_back(p);
+}
+
+void ParticleSystem::createDeath(glm::vec3 position)
+{
+    _size = 300;
+    _runtime = 1000.0;
+    _particlesize = 5;
+
+    for (int i = 0; i < _size; i++)
+    {
+        float randcolor = ((float)rand()/RAND_MAX) / 2.0;
+        Particle p(glm::vec4(0.0, 1.0, 1.0, 1.0),                      // color
+                    position,                                                // position
+                    glm::vec3((0.0008 * ((float)rand()/RAND_MAX)) - 0.0004, // velocity
+                                (0.0008 * ((float)rand()/RAND_MAX)) - 0.0004,
+                                (0.0008 * ((float)rand()/RAND_MAX)) - 0.0004));
+        _particles.push_back(p);
+    }
+}
+
+void ParticleSystem::createDeathFollowup(glm::vec3 position)
+{
+    _delay = 300;
+    _size = 600;
+    _runtime = 2000.0;
+    _particlesize = 7;
+
+    for (int i = 0; i < _size; i++)
+    {
+        float randcolor = ((float)rand()/RAND_MAX) / 2.0;
+        Particle p(glm::vec4(0.9, 1.0, 1.0, 1.0),                      // color
+                    position,                                                // position
+                    glm::vec3((0.0008 * ((float)rand()/RAND_MAX)) - 0.0004, // velocity
+                                (0.0008 * ((float)rand()/RAND_MAX)) - 0.0004,
+                                (0.0008 * ((float)rand()/RAND_MAX)) - 0.0004));
+        _particles.push_back(p);
+    }
 }
