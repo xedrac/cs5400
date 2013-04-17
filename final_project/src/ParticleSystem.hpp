@@ -40,6 +40,7 @@ private:
 
     void createExplosion(glm::vec3 position);
     void createPlayerExhaust(glm::vec3 position);
+    void createEnemyExhaust(glm::vec3 position);
 };
 
 #endif
