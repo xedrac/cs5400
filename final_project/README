@@ -1,31 +1,26 @@
 Build Instructions:
 =============================
-- Extract the source code
-
-- From the source directory, run the command "cmake ."  (don't forget the dot!)
-- For Linux/MacOS, just run 'make' to compile
+- Extract the source code from the tarball
+- Enter the "build" directory and run "cmake .." to generate the build system
+- For Linux/MacOS, just run 'make -j4' to compile
 - For Windows, a Visual Studio project file is generated
-- Run the 'render' program
+- Run the game
 
+- Note: If using Windows, CMake often has trouble finding GLEW and GLUT paths,
+        so you may need to modify the CMakeLists.txt file and tell cmake where
+        those packages.  One way to do this is to uncomment the CMAKE_PREFIX_PATH
+        line and point it to the directory where these exist
 
-
-Directions for moving camera:
+Game Controls:
 ==============================
+- WASD to move the player spaceship around
+- Left mouse click to fire standard projectiles
+- Right mouse click to fire large projectiles
+- Middle mouse click to fire obscenely large projectiles (only for really handicapped players)
 
-    Action       Key
-    ----------------
-    Move +Y       w
-    Move -Y       s
-    Move +X       d
-    Move -X       a
-    Move +Z       q
-    Move -Z       e
-
-    Pitch Up      Up Arrow
-    Pitch Down    Down Arrow
-    Yaw Left      Left Arrow
-    Yaw Right     Right Arrow
-
-    Roll Left     Page Up
-    Roll Right    Page Down
+Camera Controls:
+==============================
+- Mouse wheel to zoom camera in and out
+- While holding 'I', move mouse to pitch/yaw camera
+- Note that camera movement is somewhat restricted (cannot look beyond [-90, +90] degrees)
 

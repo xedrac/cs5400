@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-project(render)
+project(spaceinvaders)
 
 #set (CMAKE_PREFIX_PATH /usr/lib/x86_64-linux-gnu/)
 
@@ -21,7 +21,7 @@ include_directories(
 
 #link_directories(/usr/lib/x86-64/-linux-gnu/)
 
-add_executable(render
+add_executable(spaceinvaders
     src/Program.cpp
     src/BoundingBox.cpp
     src/Shader.cpp
@@ -46,7 +46,7 @@ add_executable(render
 )
 
 
-target_link_libraries(render
+target_link_libraries(spaceinvaders
     ${GLUT_LIBRARIES}
     ${GLEW_LIBRARIES}
     ${OPENGL_LIBRARIES})

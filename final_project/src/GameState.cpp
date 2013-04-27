@@ -40,11 +40,8 @@ GameState::GameState()
                                          "textures/grimmnight-back.png"));
     _skybox->addToScene(_scene);
 
-    shared_ptr<Mesh> bunnymesh        = loadMesh("bunny",         "models/bunny.ply");
-    shared_ptr<Mesh> spacefrigatemesh = loadMesh("space_frigate", "models/space_frigate.obj");
-    shared_ptr<Mesh> spaceshipmesh    = loadMesh("spaceship",     "models/spaceship.obj");
-    shared_ptr<Mesh> missilemesh      = loadMesh("missile",       "models/cylinder.ply");
-
+    shared_ptr<Mesh> spaceshipmesh = loadMesh("space_frigate", "models/space_frigate.obj");
+    shared_ptr<Mesh> missilemesh   = loadMesh("missile",       "models/cylinder.ply");
 }
 
 
