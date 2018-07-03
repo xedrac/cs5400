@@ -3,7 +3,6 @@
 
 #include <random>
 
-
 class RNG
 {
 public:
@@ -11,6 +10,8 @@ public:
 
     int   genUniformInt();
     float genUniformFloat();
+
+    static float genNormalizedFloat();
 
 private:
     std::random_device _rd;

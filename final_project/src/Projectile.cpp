@@ -1,5 +1,6 @@
 #include "glm/glm.hpp"
 #include "Projectile.hpp"
+#include "RNG.hpp"
 
 using namespace std;
 
@@ -30,6 +31,9 @@ bool Projectile::update(int elapsedms)
 {
     _boundingbox.update(getModelMatrix());
     translate(_direction * (_speed*elapsedms));
+
+    rotate(glm::vec3(0.0,1.0,0.0), 10.0);
+    //rotate(glm::vec3(RNG::genNormalizedFloat(),RNG::genNormalizedFloat(),RNG::genNormalizedFloat()), 5.0);
 
     return (getPosition().y > 1.0 || getPosition().y < -1.0);
 }

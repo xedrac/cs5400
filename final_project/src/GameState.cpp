@@ -42,6 +42,7 @@ GameState::GameState()
 
     shared_ptr<Mesh> spaceshipmesh = loadMesh("space_frigate", "models/space_frigate.obj");
     shared_ptr<Mesh> missilemesh   = loadMesh("missile",       "models/cylinder.ply");
+    shared_ptr<Mesh> bunnymesh     = loadMesh("bunny",         "models/bun_zipper_res4.ply");
 }
 
 
@@ -118,6 +119,12 @@ void GameState::gameLoop()
             //cout << "Game Over\n";
         }
 
+	onDisplay();
+    }
+}
+
+void GameState::onDisplay()
+{
         // Clear the background as black
         glClearColor(0.0, 0.0, 0.0, 1.0);
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -127,7 +134,6 @@ void GameState::gameLoop()
 
         // Display the newly rendered image to the screen
         glutSwapBuffers();
-    }
 }
 
 void GameState::onKeyRelease(unsigned char key, int, int)
@@ -214,7 +220,8 @@ void GameState::onMouseButton(int button, int state, int x, int y)
 
     case GLUT_MIDDLE_BUTTON:
         if (state == GLUT_DOWN && !_gameover)
-            fireProjectile(_playership->getPosition(), glm::vec3(0.0f, 1.0f, 0.0f), 0.5, 0.001, false);
+            //fireProjectile(_playership->getPosition(), glm::vec3(0.0f, 1.0f, 0.0f), 0.5, 0.001, false);
+            fireProjectile(_playership->getPosition(), glm::vec3(0.0f, 1.0f, 0.0f), 2.5, 0.0002, false, "bunny");
         break;
 
     case 3:  _camera.moveZ(0.02);  break;
@@ -465,10 +472,10 @@ void GameState::createEffect(ParticleSystemType type, glm::vec3 position)
 }
 
 
-void GameState::fireProjectile(glm::vec3 position, glm::vec3 direction, float scale, float speed, bool fromenemy)
+void GameState::fireProjectile(glm::vec3 position, glm::vec3 direction, float scale, float speed, bool fromenemy, const std::string &meshname)
 {
     shared_ptr<Projectile> p = make_shared<Projectile>(Projectile(_program,
-                                                                  _meshes["missile"],
+                                                                  _meshes[meshname],
                                                                   position,
                                                                   glm::vec3(scale, scale, scale),
                                                                   glm::vec3(1.0f),           

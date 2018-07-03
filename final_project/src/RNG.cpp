@@ -19,3 +19,9 @@ float RNG::genUniformFloat()
     return _uniformFloatDist(_mt);
 }
 
+float RNG::genNormalizedFloat()
+{
+    static RNG rng(0.0, 1.0);
+    return rng.genUniformFloat(); 
+}
+

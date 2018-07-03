@@ -30,6 +30,7 @@ public:
     static GameState &getInstance() { static GameState game; return game; }
 
 public:
+    void onDisplay();
     void onKey(unsigned char key, int x, int y);
     void onKeyRelease(unsigned char key, int x, int y);
     void onSpecialKey(int key, int x, int y);
@@ -43,7 +44,7 @@ private:
     void addPlayerProjectile(std::shared_ptr<Projectile> p);
 	void updateObjectState();  // update all objects in scene
 	void refreshTime();        // refresh time before starting a scene render (after models are added)
-    void fireProjectile(glm::vec3 position, glm::vec3 direction, float scale, float speed, bool fromenemy);
+    void fireProjectile(glm::vec3 position, glm::vec3 direction, float scale, float speed, bool fromenemy, const std::string &meshname = "missile");
     void createEffect(ParticleSystemType type, glm::vec3 position);
 
     enum MoveState {
